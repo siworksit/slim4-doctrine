@@ -13,19 +13,19 @@ Abstract class AbstractController
         $this->entityManager = $container['em'];
     }
 
-    public function create($request, $response, $args)
+    public function createAction($request, $response, $args)
     {
         $entityObject =  $this->modelEntity->create($request->getQueryParams());
         return $response->withJSON($entityObject->toArray());
     }
 
-    public function update($request, $response, $args)
+    public function updateAction($request, $response, $args)
     {
         $entityObject =  $this->modelEntity->update($request->getQueryParams());
         return $response->withJSON($entityObject->toArray());
     }
 
-    public function fetchAll($request, $response, $args)
+    public function fetchAllAction($request, $response, $args)
     {
         $this->fetchValidate($request->getQueryParams());
         $results =  $this->modelEntity->findAll($request->getQueryParams());
@@ -33,7 +33,7 @@ Abstract class AbstractController
         return $response->withJSON($results);
     }
 
-    public function fetchOne($request, $response, $args)
+    public function fetchOneAction($request, $response, $args)
     {
         $this->fetchValidate($request->getQueryParams());
         $account = $this->modelEntity->findOne($this->fetchValidate($request->getQueryParams()));
