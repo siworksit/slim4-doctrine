@@ -1,0 +1,11 @@
+/vendor/
+/logs/*
+\.idea/
+*.log
+data/
+nginx\.conf
+composer\.phar
+docker-compose\.yml
+Dockerfile-dev
+public/supervisord\.pid
+composer.lock
