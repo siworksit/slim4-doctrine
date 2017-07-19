@@ -1,10 +1,10 @@
 <?php
 /**
- * Billing Project (http://www.siworks.com)
+ * Example Project (http://www.siworks.com)
  *
  * Created by Rafael N. Garbinatto (rafael@siworks.com)
  * date 25/03/2017
- * @package App\Entity\Billing\Entry
+ * @package App\Entity\Example\Entry
  * @copyright SIWorks
  */
 
@@ -30,7 +30,7 @@ class Contract extends AbstractEntity
      * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=50)
@@ -53,12 +53,12 @@ class Contract extends AbstractEntity
     protected $status;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="datetime")
      */
     protected $start_dt;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="datetime")
      */
     protected $end_dt;
 

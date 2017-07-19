@@ -1,7 +1,7 @@
 <?php
-namespace App\Billing\Controller;
+namespace App\Example\Controller;
 
-use App\Billing\Model\ContractModel;
+use App\Example\Model\ContractModel;
 use App\Core\Controller\AbstractController;
 
 class ContractController extends AbstractController

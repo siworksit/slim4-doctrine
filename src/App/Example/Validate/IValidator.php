@@ -6,7 +6,7 @@
  * Time: 19:34
  */
 
-namespace App\Billing\Validate;
+namespace App\Example\Validate;
 
 
 interface IValidator

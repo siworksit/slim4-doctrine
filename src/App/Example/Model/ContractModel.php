@@ -16,8 +16,7 @@ class ContractModel extends AbstractModel
 
     public function __construct( EntityManager $entityManager)
     {
+        $this->repository = $entityManager->getRepository('App\Example\Entity\Contract\Contract');
         parent::__construct($entityManager);
-
-        $this->repository = $this->entityManager->getRepository('App\Example\Entity\Contract\Contract');
     }
 }
