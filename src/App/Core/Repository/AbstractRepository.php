@@ -63,13 +63,13 @@ Abstract class AbstractRepository extends EntityRepository
         {
             if ( is_null($criteria) || ! $this->checkAttrib($criteria) )
             {
-                $message = InvalidArgumentException::noColumnsSpecifiedForTable()->getMessage() . "(ABSREP00012exc)";
-                throw new InvalidArgumentException($message);
+                $message = \InvalidArgumentException::noColumnsSpecifiedForTable()->getMessage() . "(ABSREP00012exc)";
+                throw new \InvalidArgumentException($message);
             }
 
             return $this->getEntityManager()->getRepository($this->_entityName)->findBy($criteria, $orderBy, $limit, $offset);
         }
-        catch(Exception $e)
+        catch(\Exception $e)
         {
             throw $e;
         }
@@ -90,7 +90,7 @@ Abstract class AbstractRepository extends EntityRepository
 
             if ( ! self::checkAttrib($this->_entityName, array_keys($filters)) )
             {
-                throw new ORMInvalidArgumentException("Invalid attribute filter (ACCREP exc001)");
+                throw new Doctrine\ORM\ORMInvalidArgumentException ("Invalid attribute filter (ACCREP exc001)");
             }
 
             $qb = $this->createQueryBuilder('i');
@@ -116,7 +116,7 @@ Abstract class AbstractRepository extends EntityRepository
 
             return self::getPaginate($query);
         }
-        catch (\Doctrine\ORM\NoResultException $e)
+        catch (Doctrine\ORM\NoResultException $e)
         {
             throw $e;
         }
@@ -248,11 +248,11 @@ Abstract class AbstractRepository extends EntityRepository
 
             return $obj;
         }
-        catch(ORMInvalidArgumentException $e)
+        catch(Doctrine\ORM\ORMInvalidArgumentException $e)
         {
-            throw ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0001exc)");
+            throw Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0001exc)");
         }
-        catch(Exception $e)
+        catch(\Exception $e)
         {
             throw $e;
         }
@@ -266,11 +266,11 @@ Abstract class AbstractRepository extends EntityRepository
 
             return $obj;
         }
-        catch(ORMInvalidArgumentException $e)
+        catch(Doctrine\ORM\ORMInvalidArgumentException $e)
         {
-            throw ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0002exc)");
+            throw Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0002exc)");
         }
-        catch(Exception $e)
+        catch(\Exception $e)
         {
             throw $e;
         }
