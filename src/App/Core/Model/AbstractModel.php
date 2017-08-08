@@ -180,11 +180,10 @@ Abstract Class AbstractModel implements IModel
     {
         try {
             $metaData = $this->entityManager->getClassMetadata($this->entity_name);
-            $associations = $metaData->getAssociationMappings();
 
             foreach($this->data as $attr => $value)
             {
-                if (in_array($attr, array_keys($associations)))
+                if($metaData->hasAssociation($attr))
                 {
                     $association = $metaData->getAssociationMapping($attr);
                     $assocAttr = array_keys($association['targetToSourceKeyColumns']);
@@ -196,7 +195,7 @@ Abstract Class AbstractModel implements IModel
             return $obj;
 
         }catch(\Exception $e){
-
+            throw $e;
         }
 
     }
