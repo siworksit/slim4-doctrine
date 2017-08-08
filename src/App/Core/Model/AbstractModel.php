@@ -187,8 +187,15 @@ Abstract Class AbstractModel implements IModel
                 {
                     $association = $metaData->getAssociationMapping($attr);
                     $assocAttr = array_keys($association['targetToSourceKeyColumns']);
-                    $this->data[$attr] =  $this->entityManager->getRepository($association['targetEntity'])
-                                        ->findOneBy(array($assocAttr[0] => $value));
+
+                    if( $metaData->isAssociationWithSingleJoinColumn($attr) ){
+                        $this->data[$attr] =  $this->entityManager->getRepository($association['targetEntity'])
+                            ->findOneBy(array($assocAttr[0] => $value));
+                    }else{
+                        $this->data[$attr] =  $this->entityManager->getRepository($association['targetEntity'])
+                            ->findBy(array($assocAttr[0] => $value));
+                    }
+
                 }
             }
 
