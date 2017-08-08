@@ -21,6 +21,7 @@ use \App\Core\Entity\AbstractEntity as AbstractEntity;
  *     @ORM\Index(name="idx_canceled", columns={"canceled_at"}),
  *     @ORM\Index(name="idx_client", columns={"client_id"}),
  * })
+ * @ORM\HasLifecycleCallbacks()
  */
 class Contract extends AbstractEntity
 {
@@ -38,12 +39,12 @@ class Contract extends AbstractEntity
     protected $name;
 
     /**
-     * @ORM\Column(type="guid")
+     * @ORM\Column(type="guid",nullable=true)
      */
     protected $ext_productId;
 
     /**
-     * @ORM\Column(type="integer", length=3)
+     * @ORM\Column(type="integer", length=3, nullable=true)
      */
     protected $periodicity;
 
@@ -53,17 +54,17 @@ class Contract extends AbstractEntity
     protected $status;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date", nullable=true)
      */
     protected $start_dt;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date",nullable=true)
      */
     protected $end_dt;
 
     /**
-     * @ORM\Column(nullable=true, type="date")
+     * @ORM\Column( type="date", nullable=true)
      */
     protected $canceled_at;
 
