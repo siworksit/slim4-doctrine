@@ -9,6 +9,7 @@
 namespace App\Core\Model;
 
 use App\Core\Traits\Helpers\ObjectHelpers;
+use Doctrine\Common\Collections\ArrayCollection;
 use Ramsey\Uuid\Uuid as Uuid;
 use GeneratedHydrator\Configuration;
 use Doctrine\DBAL\Driver\PDOException;
@@ -192,8 +193,8 @@ Abstract Class AbstractModel implements IModel
                         $this->data[$attr] =  $this->entityManager->getRepository($association['targetEntity'])
                             ->findOneBy(array($assocAttr[0] => $value));
                     }else{
-                        $this->data[$attr] =  $this->entityManager->getRepository($association['targetEntity'])
-                            ->findBy(array($assocAttr[0] => $value));
+                        $this->data[$attr] =  new ArrayCollection($this->entityManager->getRepository($association['targetEntity'])
+                            ->findBy(array($assocAttr[0] => $value)));
                     }
 
                 }
