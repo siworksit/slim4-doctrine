@@ -25,6 +25,6 @@ interface IModel
      *
      * @return Entity
      */
-    public function populateObject( $obj, Array $data );
+     function populateObject($obj);
 
 }

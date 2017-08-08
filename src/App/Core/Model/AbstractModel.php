@@ -39,6 +39,13 @@ Abstract Class AbstractModel implements IModel
     public $entity_name;
 
     /**
+     * @var Array data
+     *
+     */
+
+    protected $data = array();
+
+    /**
      * AbstractModel constructor.
      * @param EntityManager $entityManager
      */
@@ -57,10 +64,12 @@ Abstract Class AbstractModel implements IModel
     {
         try
         {
+            $this->data = $data;
+
             $mapperClass = new \ReflectionClass($this->entity_name);
             $obj = $mapperClass->newInstance();
-
-            $obj = $this->populateObject($obj, $data);
+            $obj = $this->populateAssociation($obj);
+            $obj = $this->populateObject($obj);
 
             return  $this->repository->save($obj);
         }
@@ -146,25 +155,50 @@ Abstract Class AbstractModel implements IModel
         }
     }
 
-    public function populateObject( $obj, Array $data)
+    public function populateObject($obj)
     {
         try {
 
             if ($obj->getId())
             {
                 $objData = $obj->toArray();
-                $data = array_filter(array_merge($objData, $data));
+                $this->data = array_filter(array_merge($objData, $this->data));
             }
 
             $config = new Configuration($this->entity_name);
             $hydratorClass = $config->createFactory()->getHydratorClass();
             $hydrator = new $hydratorClass();
-            $hydrator->hydrate($data, $obj);
+            $hydrator->hydrate($this->data, $obj);
 
             return $obj;
         }catch(\Exception $e){
             throw $e;
         }
+    }
+
+    protected function populateAssociation($obj)
+    {
+        try {
+            $metaData = $this->entityManager->getClassMetadata($this->entity_name);
+            $associations = $metaData->getAssociationMappings();
+
+            foreach($this->data as $attr => $value)
+            {
+                if (in_array($attr, array_keys($associations)))
+                {
+                    $association = $metaData->getAssociationMapping($attr);
+                    $assocAttr = array_keys($association['targetToSourceKeyColumns']);
+                    $this->data[$attr] =  $this->entityManager->getRepository($association['targetEntity'])
+                                        ->findOneBy(array($assocAttr[0] => $value));
+                }
+            }
+
+            return $obj;
+
+        }catch(\Exception $e){
+
+        }
+
     }
 
     public function extractObject($obj)
@@ -175,8 +209,6 @@ Abstract Class AbstractModel implements IModel
 
         return $hydrator->extract($obj);
     }
-
-
 
     /**
      * @param $repository
