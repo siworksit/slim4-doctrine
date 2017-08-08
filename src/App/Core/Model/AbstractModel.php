@@ -143,9 +143,8 @@ Abstract Class AbstractModel implements IModel
             {
                 foreach ($arrObjs as $obj)
                 {
-                    $res[]= $obj->toArray();
+                    $res[]=  $obj->toArray(null, array('__cloner__', '__isInitialized__', '__initializer__'));
                 }
-
 
             }
             return $res;

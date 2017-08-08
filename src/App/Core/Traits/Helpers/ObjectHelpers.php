@@ -16,7 +16,7 @@ trait ObjectHelpers
      *
      * @return array
      */
-    public function toArray($obj = null)
+    public function toArray($obj = null, $filterKeys = array())
     {
         $obj = (is_null($obj)) ? $this : $obj;
 
@@ -32,8 +32,18 @@ trait ObjectHelpers
             }
             else if(is_object($val))
             {
-                $arr[$key] = $this->toArray($val);
+                $arr[$key] = $this->toArray($val, $filterKeys);
             }
+        }
+
+        if(count($filterKeys) > 0)
+        {
+            $arr = array_filter($arr, function($key) use ($filterKeys)
+            {
+
+                return ( ! in_array($key, $filterKeys) )? $key : null;
+
+            },ARRAY_FILTER_USE_KEY);
         }
 
         return $arr;
