@@ -1,6 +1,6 @@
 <?php
 /**
- * Billing Project (http://www.siworks.com)
+ * Example Project (http://www.siworks.com)
  *
  * Created by Rafael N. Garbinatto (rafael@siworks.com)
  * date 25/03/2017
