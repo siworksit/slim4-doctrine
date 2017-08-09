@@ -73,9 +73,8 @@ class Contract extends AbstractEntity
      */
     protected $client_id;
 
-
     /**
-     * @ORM\ManyToOne(targetEntity="App\Example\Entity\Account\Account", inversedBy="contracts")
+     * @ORM\ManyToOne(fetch="EAGER", targetEntity="App\Example\Entity\Account\Account", inversedBy="contracts")
      * @ORM\JoinColumn(name="contract_id", referencedColumnName="id")
      */
     protected $account;
