@@ -82,12 +82,11 @@ class Account extends AbstractEntity
     /**
      * @ORM\OneToMany(targetEntity="App\Example\Entity\Contract\Contract", mappedBy="account")
      */
-    protected $contracts = NULL;
+    protected $contracts;
 
 
     public function __construct()
     {
-        $this->invoices = new ArrayCollection();
         $this->contracts = new ArrayCollection();
     }
 
@@ -123,33 +122,4 @@ class Account extends AbstractEntity
         }
     }
 
-
-    public function getBalance()
-    {
-        $balance = 0;
-        foreach ($this->invoices as $invoice)
-        {
-            $balance += $invoice->getAmount();
-        }
-        return $balance;
-    }
-
-    public function addEntry($amount)
-    {
-        $this->assertAcceptEntryAllowed($amount);
-
-        $e = new Entry($this, $amount);
-        $this->entries[] = $e;
-        return $e;
-    }
-
-    private function assertAcceptEntryAllowed($amount)
-    {
-        $futureBalance = $this->getBalance() + $amount;
-        $allowedMinimalBalance = ($this->maxCredit * -1);
-        if ($futureBalance < $allowedMinimalBalance)
-        {
-            throw new Exception("Credit Limit exceeded, entry is not allowed! (ACCET01001exc)");
-        }
-    }
 }
