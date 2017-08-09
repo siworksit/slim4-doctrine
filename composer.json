@@ -1,6 +1,6 @@
 {
     "name": "rafaelgarbinatto/slim3-doctrine-skeleton",
-    "description": "Sistema de cobrança",
+    "description": "Simple implementation of Slim3 with Doctrine",
     "keywords": ["microframework", "slim3", "doctrine", "rest", "router", "psr7"],
     "homepage": "http://github.com/rafaelgarbinatto/slim3-doctrine-skeleton",
     "license": "Apache 2.0",
