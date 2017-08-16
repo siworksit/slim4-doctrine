@@ -74,8 +74,7 @@ Abstract Class AbstractModel implements IModel
 
             return  $this->repository->save($obj);
         }
-        catch (PDOException $e)
-        {
+        catch (PDOException $e){
             throw new PDOException($e->getMessage() . " (AMD0001exc)");
         }
     }
@@ -90,7 +89,7 @@ Abstract Class AbstractModel implements IModel
         try{
             if ( ! isset($data['id']) || ! Uuid::isValid($data['id']) )
             {
-                throw new \InvalidArgumentException("'Id' value is not set or is invalid (ACCENT013exc)");
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ACCENT013exc)");
             }
 
 
@@ -104,8 +103,7 @@ Abstract Class AbstractModel implements IModel
 
             return $obj;
         }
-        catch (\Exception $e)
-        {
+        catch (\Exception $e){
             throw new PDOException($e->getMessage() . " (AMD0002exc)");
         }
     }
@@ -122,8 +120,7 @@ Abstract Class AbstractModel implements IModel
             $res = $this->repository->remove($id);
             return $res;
         }
-        catch (PDOException $e)
-        {
+        catch (PDOException $e){
             throw new PDOException($e->getMessage() . " (AMD0003exc)");
         }
     }
@@ -137,7 +134,7 @@ Abstract Class AbstractModel implements IModel
 
         try
         {
-            $arrObjs = $this->repository->getSimpleListBy($data['filters'], $data['order'], $data['limit'], $data['start']);
+            $arrObjs = $this->repository->getSimpleListBy($data['filters'], $data['order'], $data['limit'], $data['offset']);
             $res = array();
             if (count($arrObjs) > 0)
             {
@@ -149,8 +146,7 @@ Abstract Class AbstractModel implements IModel
             }
             return $res;
         }
-        catch(\PDOException $e)
-        {
+        catch(\PDOException $e){
             throw $e;
         }
     }
@@ -171,7 +167,8 @@ Abstract Class AbstractModel implements IModel
             $hydrator->hydrate($this->data, $obj);
 
             return $obj;
-        }catch(\Exception $e){
+        }
+        catch(\Exception $e){
             throw $e;
         }
     }
@@ -186,22 +183,29 @@ Abstract Class AbstractModel implements IModel
                 if($metaData->hasAssociation($attr))
                 {
                     $association = $metaData->getAssociationMapping($attr);
+                    if ( ! isset($association['targetToSourceKeyColumns']) )
+                    {
+                        throw new Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD00331exc)");
+                    }
+
                     $assocAttr = array_keys($association['targetToSourceKeyColumns']);
 
-                    if( $metaData->isAssociationWithSingleJoinColumn($attr) ){
+                    if( $metaData->isAssociationWithSingleJoinColumn($attr) )
+                    {
                         $this->data[$attr] =  $this->entityManager->getRepository($association['targetEntity'])
                             ->findOneBy(array($assocAttr[0] => $value));
-                    }else{
+                    }
+                    else{
+
                         $this->data[$attr] =  new ArrayCollection($this->entityManager->getRepository($association['targetEntity'])
                             ->findBy(array($assocAttr[0] => $value)));
                     }
-
                 }
             }
 
             return $obj;
-
-        }catch(\Exception $e){
+        }
+        catch(\Exception $e){
             throw $e;
         }
 
