@@ -243,17 +243,17 @@ Abstract class AbstractRepository extends EntityRepository
     public function save($obj)
     {
         try{
+
             $this->getEntityManager()->persist($obj);
             $this->getEntityManager()->flush($obj);
 
             return $obj;
         }
-        catch(Doctrine\ORM\ORMInvalidArgumentException $e)
-        {
+        catch(Doctrine\ORM\ORMInvalidArgumentException $e) {
+
             throw Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0001exc)");
         }
-        catch(\Exception $e)
-        {
+        catch(\Exception $e) {
             throw $e;
         }
     }
