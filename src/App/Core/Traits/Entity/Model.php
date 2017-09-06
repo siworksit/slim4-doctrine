@@ -5,7 +5,8 @@ namespace App\Core\Traits\Entity;
 trait Model
 {
     public function inheritanceModel($entityManager){
-      $modelEntity  = str_replace('Controller',
+      $modelEntity  = str_replace(
+                      'Controller',
                       'Model',
                       get_called_class()
                       );
