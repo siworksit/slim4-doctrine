@@ -7,10 +7,12 @@ Abstract class AbstractController
 {
     protected $entityManager;
     protected $modelEntity;
+    use Model;
 
     public function __construct($container)
     {
         $this->entityManager = $container['em'];
+        $this->modelEntity = $this->inheritanceModel($this->entityManager);
     }
 
     public function createAction($request, $response, $args)
