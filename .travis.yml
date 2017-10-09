@@ -1,5 +1,6 @@
 language: php
 php:
   - '7.1'
-composer install
+install:
+  - composer install
 script: phpunit --configuration phpunit.xml --colors --coverage-text
