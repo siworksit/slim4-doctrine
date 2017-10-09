@@ -1,6 +1,4 @@
 language: php
 php:
   - '7.1'
-install:
-  - composer install
-script: phpunit --coverage-text
+script: ls -la
