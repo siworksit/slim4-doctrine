@@ -1,0 +1,4 @@
+language: php
+php:
+  - '7.1'
+script: --configuration phpunit.xml --colors --coverage-text
