@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Traits\Entity;
+namespace App\Core\Traits\Model;
 
 trait Model
 {

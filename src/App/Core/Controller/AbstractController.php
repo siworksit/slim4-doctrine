@@ -1,7 +1,8 @@
 <?php
 namespace App\Core\Controller;
 
-use Doctrine\ORM\EntityManager;
+use App\Core\Traits\Model\Model;
+
 
 Abstract class AbstractController
 {
