@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Functional;
+namespace Siworks\Slim\Tests\Functional;
 
 use Slim\App;
 use Slim\Http\Request;
@@ -59,11 +59,6 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
 
         // Set up dependencies
         require __DIR__ . '/../../src/dependencies.php';
-
-        // Register middleware
-        if ($this->withMiddleware) {
-            require __DIR__ . '/../../src/middleware.php';
-        }
 
         // Register routes
         require __DIR__ . '/../../src/routes.php';
