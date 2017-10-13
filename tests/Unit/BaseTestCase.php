@@ -10,6 +10,24 @@ namespace Siworks\Slim\Tests\Unit;
  */
 class BaseTestCase extends \PHPUnit_Framework_TestCase
 {
+
+    protected $entityName = 'Siworks\Slim\Doctrine\Entity\AbstractEntity';
+
+    /**
+     * @return mixed
+     */
+    public function getEntityName()
+    {
+        return $this->entityName;
+    }
+
+    /**
+     * @param mixed $entityName
+     */
+    public function setEntityName($entityName)
+    {
+        $this->entityName = $entityName;
+    }
     /**
      * @return \Doctrine\ORM\EntityManager|\PHPUnit_Framework_MockObject_MockObject
      */
@@ -21,6 +39,7 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
                 array(
                     'getConnection',
                     'getClassMetadata',
+                    'find',
                     'close',
                 )
             )
@@ -31,6 +50,10 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
         $mock->expects($this->any())
             ->method('getClassMetadata')
             ->will($this->returnValue($this->getClassMetadataMock()));
+        $mock->expects($this->any())
+            ->method('find')
+            ->with($this->isType('string'),$this->isType('integer'))
+            ->will($this->returnValue($this->getEntityMock()));
         return $mock;
     }
 
@@ -39,13 +62,14 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
      */
     public function getClassMetadataMock()
     {
-        $mock = $this->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadataInfo')
+        $mock = $this->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadata')
             ->disableOriginalConstructor()
             ->setMethods(array('getTableName'))
             ->getMock();
         $mock->expects($this->any())
             ->method('getTableName')
             ->will($this->returnValue('{tableName}'));
+        $mock->name = $this->getEntityName();
         return $mock;
     }
 
@@ -138,5 +162,43 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
             $methods,
             false
         );
+    }
+
+    public function getEntityMock()
+    {
+        $stubEntity = $this->getMockBuilder($this->getEntityName())
+            ->getMockForAbstractClass();
+        $stubEntity->id = 12345;
+        $stubEntity->name = 'Diego';
+        $stubEntity->last = 'first';
+        return $stubEntity;
+    }
+
+
+    public function getRepositoryMock()
+    {
+        $mock = $this->getMockBuilder('\Siworks\Slim\Doctrine\Repository\AbstractRepository')
+            ->disableOriginalConstructor()
+            ->setMethods(
+                array(
+                    'findOneById',
+                    'remove',
+                    'getSimpleListBy',
+                    'save'
+                ))->getMockForAbstractClass();
+
+        $mock->expects($this->any())
+            ->method('findOneById')
+            ->willReturn($this->getEntityMock());
+        $mock->expects($this->any())
+            ->method('remove')
+            ->willReturn($this->getEntityMock());
+        $mock->expects($this->any())
+            ->method('getSimpleListBy')
+            ->willReturn([$this->getEntityMock()]);
+        $mock->expects($this->any())
+            ->method('save')
+            ->willReturn($this->getEntityMock());
+        return $mock;
     }
 }

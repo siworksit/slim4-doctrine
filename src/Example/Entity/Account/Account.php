@@ -7,7 +7,7 @@
  *
  * @copyright SIWorks
  */
-namespace Siworks\Slim\Doctrine\Example\Entity\Account;
+namespace Siworks\Slim\Example\Entity\Account;
 
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid as Uuid;

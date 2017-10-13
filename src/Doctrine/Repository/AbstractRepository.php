@@ -14,6 +14,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\EntityRepository as EntityRepository;
 use Symfony\Component\Debug\Exception\ClassNotFoundException;
+use Doctrine\ORM\Mapping;
 
 Abstract class AbstractRepository extends EntityRepository
 {
@@ -275,5 +276,4 @@ Abstract class AbstractRepository extends EntityRepository
             throw $e;
         }
     }
-
 }

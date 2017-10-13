@@ -42,7 +42,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Siworks\\Slim\\Doctrine\\": "src/Doctrine/"
+            "Siworks\\Slim\\Doctrine\\": "src/Doctrine/",
+            "Siworks\\Slim\\Example\\": "src/Example/"
        }
     },
     "autoload-dev": {

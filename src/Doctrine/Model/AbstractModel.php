@@ -97,7 +97,7 @@ Abstract Class AbstractModel implements IModel
     {
         try
         {
-            $this->data = $data;
+            $this->setData($data);
 
             $obj = $this->getObj();
 
@@ -122,16 +122,16 @@ Abstract Class AbstractModel implements IModel
      * @return Object | NULL
      * @throws \Exception
      */
-    public function update(Array $data)
+    public function update(array $data)
     {
         try{
-            if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && ! is_numeric($data['id'])) )
+            if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
             {
                 throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ACCENT013exc)");
             }
-            $this->data = $data;
+            $this->setData($data);
 
-            $obj = $this->repository->findOneById($this->data['id']);
+            $obj = $this->repository->findOneById($this->getData()['id']);
             if( ! $obj instanceof $this->entityName )
             {
                 return null;
@@ -166,7 +166,7 @@ Abstract Class AbstractModel implements IModel
         }
     }
 
-    public function findAll(Array $data)
+    public function findAll(array $data)
     {
         $data['filters'] = (isset($data['filters']) && is_array($data['filters'])) ? $data['filters'] : array();
         $data['order']   = (isset($data['order']) && is_array($data['order']))     ? $data['order']   : array();
@@ -199,13 +199,11 @@ Abstract Class AbstractModel implements IModel
             if ($obj->getId())
             {
                 $objData = $obj->toArray();
-                $this->data = array_filter(array_merge($objData, $this->data));
+                $this->setData(array_filter(array_merge($objData, $this->getData())));
             }
 
-            $config = new Configuration($this->entityName);
-            $hydratorClass = $config->createFactory()->getHydratorClass();
-            $hydrator = new $hydratorClass();
-            $hydrator->hydrate($this->data, $obj);
+
+            $this->getHydrator()->hydrate($this->getData(), $obj);
 
             return $obj;
         }
@@ -214,12 +212,36 @@ Abstract Class AbstractModel implements IModel
         }
     }
 
+    public function getHydrator()
+    {
+        $config = new Configuration($this->getEntityName());
+        $hydratorClass = $config->createFactory()->getHydratorClass();
+        $hydrator = new $hydratorClass();
+        return $hydrator;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param array $data
+     */
+    public function setData(array $data)
+    {
+        $this->data = $data;
+    }
+
     protected function populateAssociation($obj)
     {
         try {
             $metaData = $this->entityManager->getClassMetadata($this->entityName);
 
-            foreach($this->data as $attr => $value)
+            foreach($this->getData() as $attr => $value)
             {
                 if($metaData->hasAssociation($attr))
                 {
@@ -233,12 +255,12 @@ Abstract Class AbstractModel implements IModel
 
                     if( $metaData->isAssociationWithSingleJoinColumn($attr) )
                     {
-                        $this->data[$attr] =  $this->entityManager->getRepository($association['targetEntity'])
+                        $this->getData()[$attr] =  $this->entityManager->getRepository($association['targetEntity'])
                             ->findOneBy(array($assocAttr[0] => $value));
                     }
                     else{
 
-                        $this->data[$attr] =  new ArrayCollection($this->entityManager->getRepository($association['targetEntity'])
+                        $this->getData()[$attr] =  new ArrayCollection($this->entityManager->getRepository($association['targetEntity'])
                             ->findBy(array($assocAttr[0] => $value)));
                     }
                 }
@@ -253,11 +275,7 @@ Abstract Class AbstractModel implements IModel
 
     public function extractObject($obj)
     {
-        $config = new Configuration($this->entityName);
-        $hydratorClass = $config->createFactory()->getHydratorClass();
-        $hydrator = new $hydratorClass();
-
-        return $hydrator->extract($obj);
+        return $this->getHydrator()->extract($obj);
     }
 
     /**
