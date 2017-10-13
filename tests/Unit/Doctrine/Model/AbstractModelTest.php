@@ -67,6 +67,7 @@ class AbstractModelTest extends BaseTestCase
 
         $entityRepository->expects($this->any())
             ->method('save')
+            ->with($stubEntity)
             ->willReturn($stubEntity);
 
 
