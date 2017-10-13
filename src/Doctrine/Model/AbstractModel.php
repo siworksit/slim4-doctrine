@@ -37,7 +37,7 @@ Abstract Class AbstractModel implements IModel
     /**
      * Entity namespace default for this model
      */
-    public $entity_name;
+    public $entityName;
 
     /**
      * @var array data
@@ -52,8 +52,40 @@ Abstract Class AbstractModel implements IModel
      */
     public function __construct( EntityManager	$entityManager )
     {
+        $this->setEntityManager($entityManager);
+        $this->setEntityName($this->repository->getClassName());
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEntityName()
+    {
+        return $this->entityName;
+    }
+
+    /**
+     * @param mixed $entityName
+     */
+    public function setEntityName($entityName)
+    {
+        $this->entityName = $entityName;
+    }
+
+    /**
+     * @return EntityManager
+     */
+    public function getEntityManager(): EntityManager
+    {
+        return $this->entityManager;
+    }
+
+    /**
+     * @param EntityManager $entityManager
+     */
+    public function setEntityManager(EntityManager $entityManager)
+    {
         $this->entityManager = $entityManager;
-        $this->entity_name = $this->repository->getClassName();
     }
 
     /**
@@ -67,8 +99,7 @@ Abstract Class AbstractModel implements IModel
         {
             $this->data = $data;
 
-            $mapperClass = new \ReflectionClass($this->entity_name);
-            $obj = $mapperClass->newInstance();
+            $obj = $this->getObj();
 
             $this->populateAssociation($obj);
             $obj = $this->populateObject($obj);
@@ -78,6 +109,12 @@ Abstract Class AbstractModel implements IModel
         catch (PDOException $e){
             throw new PDOException( "{$e->getMessage()} . (AMD0001exc)");
         }
+    }
+
+    public function getObj()
+    {
+        $mapperClass = new \ReflectionClass($this->entityName);
+        return $mapperClass->newInstance();
     }
 
     /**
@@ -95,7 +132,7 @@ Abstract Class AbstractModel implements IModel
             $this->data = $data;
 
             $obj = $this->repository->findOneById($this->data['id']);
-            if( ! $obj instanceof $this->entity_name )
+            if( ! $obj instanceof $this->entityName )
             {
                 return null;
             }
@@ -165,7 +202,7 @@ Abstract Class AbstractModel implements IModel
                 $this->data = array_filter(array_merge($objData, $this->data));
             }
 
-            $config = new Configuration($this->entity_name);
+            $config = new Configuration($this->entityName);
             $hydratorClass = $config->createFactory()->getHydratorClass();
             $hydrator = new $hydratorClass();
             $hydrator->hydrate($this->data, $obj);
@@ -180,7 +217,7 @@ Abstract Class AbstractModel implements IModel
     protected function populateAssociation($obj)
     {
         try {
-            $metaData = $this->entityManager->getClassMetadata($this->entity_name);
+            $metaData = $this->entityManager->getClassMetadata($this->entityName);
 
             foreach($this->data as $attr => $value)
             {
@@ -189,7 +226,7 @@ Abstract Class AbstractModel implements IModel
                     $association = $metaData->getAssociationMapping($attr);
                     if ( ! isset($association['targetToSourceKeyColumns']) )
                     {
-                        throw new Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD00331exc)");
+                        throw new \Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD00331exc)");
                     }
 
                     $assocAttr = array_keys($association['targetToSourceKeyColumns']);
@@ -216,7 +253,7 @@ Abstract Class AbstractModel implements IModel
 
     public function extractObject($obj)
     {
-        $config = new Configuration($this->entity_name);
+        $config = new Configuration($this->entityName);
         $hydratorClass = $config->createFactory()->getHydratorClass();
         $hydrator = new $hydratorClass();
 

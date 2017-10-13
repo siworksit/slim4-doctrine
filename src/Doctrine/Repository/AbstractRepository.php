@@ -24,7 +24,7 @@ Abstract class AbstractRepository extends EntityRepository
      *
      * @param Int $id
      *
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws \\Doctrine\ORM\NoResultException
      *
      * @return Object | NULL
      */
@@ -80,8 +80,8 @@ Abstract class AbstractRepository extends EntityRepository
      *
      * @param string $status
      * @param int    $hydrate
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \\Doctrine\ORM\NoResultException
+     * @throws \\Doctrine\ORM\NonUniqueResultException
      * @return \Paginator
      */
     public function getListBy(Array $filters, $limit, $hydrate = Query::HYDRATE_SINGLE_SCALAR)
@@ -90,7 +90,7 @@ Abstract class AbstractRepository extends EntityRepository
 
             if ( ! self::checkAttrib($this->_entityName, array_keys($filters)) )
             {
-                throw new Doctrine\ORM\ORMInvalidArgumentException ("Invalid attribute filter (ACCREP exc001)");
+                throw new \Doctrine\ORM\ORMInvalidArgumentException ("Invalid attribute filter (ACCREP exc001)");
             }
 
             $qb = $this->createQueryBuilder('i');
@@ -116,7 +116,7 @@ Abstract class AbstractRepository extends EntityRepository
 
             return self::getPaginate($query);
         }
-        catch (Doctrine\ORM\NoResultException $e)
+        catch (\Doctrine\ORM\NoResultException $e)
         {
             throw $e;
         }
@@ -249,9 +249,9 @@ Abstract class AbstractRepository extends EntityRepository
 
             return $obj;
         }
-        catch(Doctrine\ORM\ORMInvalidArgumentException $e) {
+        catch(\Doctrine\ORM\ORMInvalidArgumentException $e) {
 
-            throw Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0001exc)");
+            throw \Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0001exc)");
         }
         catch(\Exception $e) {
             throw $e;
@@ -266,9 +266,9 @@ Abstract class AbstractRepository extends EntityRepository
 
             return $obj;
         }
-        catch(Doctrine\ORM\ORMInvalidArgumentException $e)
+        catch(\Doctrine\ORM\ORMInvalidArgumentException $e)
         {
-            throw Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0002exc)");
+            throw \Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0002exc)");
         }
         catch(\Exception $e)
         {
