@@ -50,6 +50,7 @@ class AbstractControllerTest extends BaseTestCase
             ->getMock();
         $modelMock->method('create')->will($this->returnValue($returnJson));
         $modelMock->method('update')->will($this->returnValue($returnJson));
+        $modelMock->method('remove')->will($this->returnValue($returnJson));
         $modelMock->method('findAll')->will($this->returnValue(['retorno1','retorno2','retorno3']));
 
         $environment = Environment::mock(
@@ -88,6 +89,12 @@ class AbstractControllerTest extends BaseTestCase
     public function testUpdateAction()
     {
         $response = $this->controller->updateAction($this->request,$this->response,[]);
+        $this->assertEquals('["retorno1","retorno2","retorno3"]',$response->getBody()->__toString());
+    }
+
+    public function testRemoveAction()
+    {
+        $response = $this->controller->removeAction($this->request,$this->response,[]);
         $this->assertEquals('["retorno1","retorno2","retorno3"]',$response->getBody()->__toString());
     }
 

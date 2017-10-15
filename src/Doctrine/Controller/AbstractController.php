@@ -61,6 +61,12 @@ Abstract class AbstractController
         return $response->withJSON($entityObject->toArray());
     }
 
+    public function removeAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
+    {
+        $entityObject =  $this->modelEntity->remove($request->getQueryParams());
+        return $response->withJSON($entityObject->toArray());
+    }
+
     public function fetchAllAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
         $this->fetchValidate($request->getQueryParams());
