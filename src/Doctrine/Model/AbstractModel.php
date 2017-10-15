@@ -156,14 +156,18 @@ Abstract Class AbstractModel implements IModel
      */
     public function remove(array $data)
     {
-
-        if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
-        {
-            throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ACCENT013exc)");
-        }
         try
         {
-            $res = $this->repository->remove($data['id']);
+            if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
+            {
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ACCENT013exc)");
+            }
+            $obj = $this->repository->findOneById($data['id']);
+            if( ! $obj instanceof $this->entityName )
+            {
+                return null;
+            }
+            $res = $this->repository->remove($obj);
             return $res;
         }
         catch (PDOException $e){
