@@ -32,6 +32,7 @@ trait TimeStampable
      */
     public function preUpdateListener()
     {
+        $this->created_at = new \DateTime($this->created_at);
         $this->updated_at = new \DateTime("NOW");
     }
 
