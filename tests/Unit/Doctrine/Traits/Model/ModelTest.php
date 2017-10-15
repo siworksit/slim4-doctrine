@@ -16,6 +16,6 @@ class ModelTest extends BaseTestCase
     {
         $mock = $this->getMockForTrait('Siworks\Slim\Doctrine\Traits\Model\Model');
 
-        $mock->inheritanceModel($this->getEntityManagerMock());
+        $this->assertEquals($mock,$mock->inheritanceModel($this->getEntityManagerMock()));
     }
 }

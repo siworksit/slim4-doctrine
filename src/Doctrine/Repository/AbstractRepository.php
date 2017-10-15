@@ -7,13 +7,13 @@ namespace Siworks\Slim\Doctrine\Repository;
  * Time: 16:54
  */
 
-use Doctrine\DBAL\Exception\InvalidArgumentException;
+use Doctrine\DBAL\Exception\InvalidArgumentException as InvalidArgumentException;
 use Doctrine\ORM\ORMInvalidArgumentException as ORMInvalidArgumentException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\EntityRepository as EntityRepository;
-use Symfony\Component\Debug\Exception\ClassNotFoundException;
+use Symfony\Component\Debug\Exception\ClassNotFoundException as ClassNotFoundException;
 use Doctrine\ORM\Mapping;
 
 Abstract class AbstractRepository extends EntityRepository
@@ -62,9 +62,9 @@ Abstract class AbstractRepository extends EntityRepository
     {
         try
         {
-            if ( is_null($criteria) || ! $this->checkAttrib($criteria) )
+            if ( ! $this->checkAttrib($criteria) )
             {
-                $message = \InvalidArgumentException::noColumnsSpecifiedForTable()->getMessage() . "(ABSREP00012exc)";
+                $message = InvalidArgumentException::noColumnsSpecifiedForTable($this->getEntityName())->getMessage() . "(ABSREP00012exc)";
                 throw new \InvalidArgumentException($message);
             }
 
@@ -89,18 +89,18 @@ Abstract class AbstractRepository extends EntityRepository
     {
         try{
 
-            if ( ! self::checkAttrib($this->_entityName, array_keys($filters)) )
+            if ( ! $this->checkAttrib([$this->_entityName, array_keys($filters)]) )
             {
                 throw new \Doctrine\ORM\ORMInvalidArgumentException ("Invalid attribute filter (ACCREP exc001)");
             }
 
             $qb = $this->createQueryBuilder('i');
             $qb->select('e')
-                ->from($this->_entityName);
+                ->from($this->_entityName,$this->_entityName{0});
 
             if (isset($filters['where']))
             {
-                $qb = self::createWhere($filters['where'], $qb);
+                $qb = $this->createWhere($filters['where'], $qb);
             }
 
             // fica para futuro
@@ -110,12 +110,12 @@ Abstract class AbstractRepository extends EntityRepository
 
             if (isset($filters['orderBy']))
             {
-                $qb = self::createOrderBy($filters['orderBy'], $qb);
+                $qb = $this->createOrderBy($filters['orderBy'], $qb);
             }
 
             $query = $qb->getQuery();
 
-            return self::getPaginate($query);
+            return $this->getPaginate(null,null, $query);
         }
         catch (\Doctrine\ORM\NoResultException $e)
         {
@@ -128,13 +128,13 @@ Abstract class AbstractRepository extends EntityRepository
     }
 
 
-    public function checkAttrib(Array $list)
+    public function checkAttrib(array $list)
     {
 
         $list_filtred = $this->getAttributesList($list);
         if ( ! class_exists($this->_entityName) )
         {
-            throw new ClassNotFoundException("Namespace {$this->_entityName} not found (ABSREP0011exc)");
+            throw new ClassNotFoundException("Namespace {$this->_entityName} not found (ABSREP0011exc)", new \ErrorException());
         }
 
 
@@ -225,8 +225,11 @@ Abstract class AbstractRepository extends EntityRepository
      * @param int $limit
      * @return Paginator
      */
-    public function getPaginate( $offset = 0, $limit = 10, Query $query)
+    public function getPaginate( $offset = 0, $limit = 10, $query)
     {
+        if(!$query instanceof Query){
+            throw new ORMInvalidArgumentException ("Must be an instance of Doctrine\ORM\Query, instance of ".get_class($query)." given (ABSREP0015exc)");
+        }
         $paginator = new Paginator($query->getDQL());
 
         $paginator->getQuery()

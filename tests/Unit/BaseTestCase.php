@@ -2,13 +2,15 @@
 
 namespace Siworks\Slim\Tests\Unit;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * This is an example class that shows how you could set up a method that
  * runs the application. Note that it doesn't cover all use-cases and is
  * tuned to the specifics of this skeleton app, so if your needs are
  * different, you'll need to change it.
  */
-class BaseTestCase extends \PHPUnit_Framework_TestCase
+class BaseTestCase extends TestCase
 {
 
     protected $entityName = 'Siworks\Slim\Doctrine\Entity\AbstractEntity';
@@ -39,7 +41,11 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
                 array(
                     'getConnection',
                     'getClassMetadata',
+                    'getRepository',
                     'find',
+                    'persist',
+                    'remove',
+                    'flush',
                     'close',
                 )
             )
@@ -51,8 +57,23 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
             ->method('getClassMetadata')
             ->will($this->returnValue($this->getClassMetadataMock()));
         $mock->expects($this->any())
+            ->method('getRepository')
+            ->will($this->returnValue($this->getRepositoryMock()));
+        $mock->expects($this->any())
             ->method('find')
             ->with($this->isType('string'),$this->isType('integer'))
+            ->will($this->returnValue($this->getEntityMock()));
+        $mock->expects($this->any())
+            ->method('persist')
+            ->with($this->getEntityMock())
+            ->will($this->returnValue($this->getEntityMock()));
+        $mock->expects($this->any())
+            ->method('remove')
+            ->with($this->getEntityMock())
+            ->will($this->returnValue($this->getEntityMock()));
+        $mock->expects($this->any())
+            ->method('flush')
+            ->with($this->getEntityMock())
             ->will($this->returnValue($this->getEntityMock()));
         return $mock;
     }
@@ -182,6 +203,7 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
             ->setMethods(
                 array(
                     'findOneById',
+                    'findBy',
                     'remove',
                     'getSimpleListBy',
                     'save'
@@ -190,6 +212,9 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
         $mock->expects($this->any())
             ->method('findOneById')
             ->willReturn($this->getEntityMock());
+        $mock->expects($this->any())
+            ->method('findBy')
+            ->willReturn([$this->getEntityMock()]);
         $mock->expects($this->any())
             ->method('remove')
             ->willReturn($this->getEntityMock());

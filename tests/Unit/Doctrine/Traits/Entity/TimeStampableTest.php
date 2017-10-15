@@ -9,8 +9,9 @@
 namespace Unit\Doctrine\Traits\Entity;
 
 use Siworks\Slim\Doctrine\Traits\Entity\TimeStampable;
+use PHPUnit\Framework\TestCase;
 
-class TimeStampableTest extends \PHPUnit_Framework_TestCase
+class TimeStampableTest extends TestCase
 {
 
     /*

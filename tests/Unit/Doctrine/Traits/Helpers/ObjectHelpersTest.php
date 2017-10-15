@@ -9,8 +9,9 @@
 namespace Unit\Doctrine\Traits\Helpers;
 
 use Siworks\Slim\Doctrine\Traits\Helpers\ObjectHelpers;
+use PHPUnit\Framework\TestCase;
 
-class ObjectHelpersTest extends \PHPUnit_Framework_TestCase
+class ObjectHelpersTest extends TestCase
 {
     /*
     * @var Siworks\Slim\Doctrine\Traits\Helpers\ObjectHelpers

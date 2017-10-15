@@ -9,8 +9,9 @@
 namespace Unit\Doctrine\Entity;
 
 use Siworks\Slim\Doctrine\Entity\AbstractEntity;
+use PHPUnit\Framework\TestCase;
 
-class AbstractEntityTest extends \PHPUnit_Framework_TestCase
+class AbstractEntityTest extends TestCase
 {
     /**
      * @var \Siworks\Slim\Doctrine\Controller\AbstractEntity

@@ -134,9 +134,7 @@ class AbstractModelTest extends BaseTestCase
             ->getMockForAbstractClass();
 
         $stub->setEntityName($this->getEntityName());
-        $teste = $this->getEntityMock()->toArray();
-        $ok = $stub->populateObject($this->getEntityMock())->toArray();
-
+        $this->assertEquals($this->getEntityMock()->toArray(),$stub->populateObject($this->getEntityMock())->toArray());
     }
 
     public function testPopulateAssociation()
