@@ -17,6 +17,14 @@ Execute composer command with:
 ```sh
 $ docker-compose run --rm composer
 ```
+
+Execute PHPUnit with:
 ```sh
 $ docker-compose run --rm phpunit
+```
+
+OR
+
+```sh
+$ ./vendor/bin/phpunit --coverage-html coverage
 ```
