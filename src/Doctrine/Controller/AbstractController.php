@@ -2,19 +2,16 @@
 namespace Siworks\Slim\Doctrine\Controller;
 
 use Doctrine\ORM\EntityManager;
-use Siworks\Slim\Doctrine\Traits\Model\Model;
 use Siworks\Slim\Doctrine\Model\IModel;
 
 Abstract class AbstractController
 {
     protected $entityManager;
     protected $modelEntity;
-    use Model;
 
     public function __construct($container)
     {
         $this->setEntityManager($container['em']);
-        $this->setModelEntity($this->inheritanceModel($this->entityManager));
     }
 
     /**
