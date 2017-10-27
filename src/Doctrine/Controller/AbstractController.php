@@ -8,10 +8,12 @@ Abstract class AbstractController
 {
     protected $entityManager;
     protected $modelEntity;
+    protected $logger;
 
     public function __construct($container)
     {
         $this->setEntityManager($container['em']);
+        $this->setLogger($container['logger']);
     }
 
     /**
@@ -44,6 +46,22 @@ Abstract class AbstractController
     public function setModelEntity(\Siworks\Slim\Doctrine\Model\IModel $modelEntity)
     {
         $this->modelEntity = $modelEntity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @param mixed $logger
+     */
+    public function setLogger($logger)
+    {
+        $this->logger = $logger;
     }
 
     public function createAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
