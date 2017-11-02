@@ -67,19 +67,19 @@ Abstract class AbstractController
     public function createAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
         $entityObject =  $this->modelEntity->create($request->getQueryParams());
-        return $response->withJSON($entityObject->toArray());
+        return $response->withJSON($entityObject->extractObject());
     }
 
     public function updateAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
         $entityObject =  $this->modelEntity->update($request->getQueryParams());
-        return $response->withJSON($entityObject->toArray());
+        return $response->withJSON($entityObject->extractObject());
     }
 
     public function removeAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
         $entityObject =  $this->modelEntity->remove($request->getQueryParams());
-        return $response->withJSON($entityObject->toArray());
+        return $response->withJSON($entityObject->extractObject());
     }
 
     public function fetchAllAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
