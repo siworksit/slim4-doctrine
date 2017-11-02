@@ -8,6 +8,7 @@
 
 namespace Siworks\Slim\Doctrine\Traits\Helpers;
 
+use GeneratedHydrator\Configuration;
 
 trait ObjectHelpers
 {
@@ -46,5 +47,45 @@ trait ObjectHelpers
         }
 
         return $arr;
+    }
+
+    public function extractObject($obj = null)
+    {
+        $obj = (is_null($obj)) ? $this : $obj;
+
+        $arr = (is_object($obj)) ? $this->getHydrator()->extract($obj) : $obj;
+
+        foreach ($arr as $key => $val)
+        {
+            if(is_object($val))
+            {
+                if($val instanceof \DateTime)
+                {
+                    $val->format('Y-m-d H:i:s');
+                    $arr[$key] =  $val->format('Y-m-d H:i:s');
+                }
+                else if($val instanceof \Doctrine\ORM\PersistentCollection)
+                {
+                    $arr[$key] = $val->toArray();
+                    foreach($arr[$key] as $index => $value)
+                    {
+                        $arr[$key][$index] = $value->toArray();
+                    }
+                }
+                else if(is_object($val))
+                {
+                    $arr[$key] = $this->extractObject($val);
+                }
+            }
+        }
+        return $arr;
+    }
+
+    public function getHydrator()
+    {
+        $config = new Configuration(get_class($this));
+        $hydratorClass = $config->createFactory()->getHydratorClass();
+        $hydrator = new $hydratorClass();
+        return $hydrator;
     }
 }
