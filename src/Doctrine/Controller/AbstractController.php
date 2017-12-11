@@ -66,13 +66,13 @@ Abstract class AbstractController
 
     public function createAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-        $entityObject =  $this->modelEntity->create($request->getQueryParams());
+        $entityObject =  $this->modelEntity->create($request->getParsedBody());
         return $response->withJSON($entityObject->extractObject());
     }
 
     public function updateAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-        $entityObject =  $this->modelEntity->update($request->getQueryParams());
+        $entityObject =  $this->modelEntity->update($request->getParsedBody());
         return $response->withJSON($entityObject->extractObject());
     }
 
