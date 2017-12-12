@@ -35,7 +35,7 @@ class AbstractModelTest extends BaseTestCase
         $this->model->expects($this->any())
             ->method('populateAssociation')
             ->with($this->getEntityMock())
-            ->willReturn(TRUE);
+            ->willReturn($this->getEntityMock());
 
         $this->model->expects($this->any())
             ->method('populateObject')
@@ -151,7 +151,7 @@ class AbstractModelTest extends BaseTestCase
 
         $method = new \ReflectionMethod(get_class($stub), 'populateAssociation');
         $method->setAccessible(true);
-        $this->assertTrue($method->invokeArgs($stub,[$this->getEntityMock()]));
+        $this->assertEquals($this->getEntityMock(),$method->invokeArgs($stub,[$this->getEntityMock()]));
     }
 
     public function testExtractObject()

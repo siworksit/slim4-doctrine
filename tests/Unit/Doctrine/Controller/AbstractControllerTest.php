@@ -39,9 +39,9 @@ class AbstractControllerTest extends BaseTestCase
             ->getMockForAbstractClass();
 
         $returnJson = $this->getMockBuilder("json")
-            ->setMethods(['toArray'])
+            ->setMethods(['extractObject'])
             ->getMock();
-        $returnJson->method('toArray')
+        $returnJson->method('extractObject')
             ->will($this->returnValue(['retorno1','retorno2','retorno3']));
 
         $modelMock = $this->getMockBuilder('Siworks\Slim\Doctrine\Model\AbstractModel')
@@ -55,7 +55,6 @@ class AbstractControllerTest extends BaseTestCase
 
         $environment = Environment::mock(
             [
-                'REQUEST_METHOD' => 'POST',
                 'REQUEST_URI' => '/'
             ]
         );
@@ -82,12 +81,20 @@ class AbstractControllerTest extends BaseTestCase
 
     public function testCreateAction()
     {
+        $this->request = $this->request->withHeader('Content-Type', 'application/json');
+        $this->request = $this->request->withMethod('POST');
+        $this->request = $this->request->withParsedBody(["retorno1","retorno2","retorno3"]);
+
         $response = $this->controller->createAction($this->request,$this->response,[]);
         $this->assertEquals('["retorno1","retorno2","retorno3"]',$response->getBody()->__toString());
     }
 
     public function testUpdateAction()
     {
+        $this->request = $this->request->withHeader('Content-Type', 'application/json');
+        $this->request = $this->request->withMethod('POST');
+        $this->request = $this->request->withParsedBody(["retorno1","retorno2","retorno3"]);
+
         $response = $this->controller->updateAction($this->request,$this->response,[]);
         $this->assertEquals('["retorno1","retorno2","retorno3"]',$response->getBody()->__toString());
     }
