@@ -66,13 +66,27 @@ Abstract class AbstractController
 
     public function createAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-        $entityObject =  $this->modelEntity->create($request->getParsedBody());
+        $data = $request->getParsedBody();
+
+        if (count($files = $request->getUploadedFiles()) > 0)
+        {
+            $data = array_merge($data, $files);
+        }
+
+        $entityObject =  $this->modelEntity->create($data);
         return $response->withJSON($entityObject->extractObject());
     }
 
     public function updateAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-        $entityObject =  $this->modelEntity->update($request->getParsedBody());
+        $data = $request->getParsedBody();
+
+        if (count($files = $request->getUploadedFiles()) > 0)
+        {
+            $data = array_merge($data, $files);
+        }
+
+        $entityObject =  $this->modelEntity->update($data);
         return $response->withJSON($entityObject->extractObject());
     }
 
