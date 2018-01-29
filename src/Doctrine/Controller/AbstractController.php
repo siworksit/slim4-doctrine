@@ -66,41 +66,76 @@ Abstract class AbstractController
 
     public function createAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-        $data = $request->getParsedBody();
-
-        if (count($files = $request->getUploadedFiles()) > 0)
+        try
         {
-            $data = array_merge($data, $files);
+            $data = $request->getParsedBody();
+
+            if (count($files = $request->getUploadedFiles()) > 0)
+            {
+                $data = array_merge($data, $files);
+            }
+
+            $entityObject =  $this->modelEntity->create($data);
+
+            return $response->withJSON($entityObject->extractObject());
+
+        }
+        catch (\Exception $e){
+            //trato aqui
+
+            return $response->withJSON($entityObject->extractObject());
         }
 
-        $entityObject =  $this->modelEntity->create($data);
-        return $response->withJSON($entityObject->extractObject());
     }
 
     public function updateAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-        $data = $request->getParsedBody();
-
-        if (count($files = $request->getUploadedFiles()) > 0)
+        try
         {
-            $data = array_merge($data, $files);
-        }
+            $data = $request->getParsedBody();
 
-        $entityObject =  $this->modelEntity->update($data);
-        return $response->withJSON($entityObject->extractObject());
+            if (count($files = $request->getUploadedFiles()) > 0) {
+                $data = array_merge($data, $files);
+            }
+
+            $entityObject = $this->modelEntity->update($data);
+            return $response->withJSON($entityObject->extractObject());
+        } catch (\Exception $e) {
+            //trato aqui
+
+            return $response->withJSON($entityObject->extractObject());
+        }
     }
 
     public function removeAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-        $entityObject =  $this->modelEntity->remove($request->getQueryParams());
-        return $response->withJSON($entityObject->extractObject());
+        try
+        {
+            $entityObject =  $this->modelEntity->remove($request->getQueryParams());
+            return $response->withJSON($entityObject->extractObject());
+
+        }
+        catch (\Exception $e) {
+            //trato aqui
+
+            return $response->withJSON($entityObject->extractObject());
+        }
     }
 
     public function fetchAllAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-        $this->fetchValidate($request->getQueryParams());
-        $results =  $this->modelEntity->findAll($request->getQueryParams());
-        return $response->withJSON($results);
+        try
+        {
+            $this->fetchValidate($request->getQueryParams());
+            $results =  $this->modelEntity->findAll($request->getQueryParams());
+            return $response->withJSON($results);
+
+        }
+        catch (\Exception $e) {
+            //trato aqui
+
+            return $response->withJSON($entityObject->extractObject());
+        }
     }
 
     /**
@@ -130,6 +165,40 @@ Abstract class AbstractController
         }
 
         return $args;
+    }
+
+    public function getPatternResponseRestFull ($action, $data, \Psr\Http\Message\ResponseInterface $response)
+    {
+        switch ($action)
+        {
+            case "POST":
+                    $response->withStatus(201, "Created");
+                    $jsonResp = [
+                        "code"    => 201,
+                        "message" => "created",
+                        "data"    => $data,
+                    ];
+                break;
+            case "PUT":
+            case "PATCH":
+                    $response->withStatus(200, "Ok");
+                    $jsonResp = [
+                        "code"    => 200,
+                        "message" => "ok",
+                        "data"    => $data,
+                    ];
+                break;
+            case "DELETE":
+                    $response->withStatus(204, "Ok");
+                    $jsonResp = [
+                        "code"    => 204,
+                        "message" => "ok",
+                        "data"    => $data,
+                    ];
+                break;
+        }
+
+
     }
 
 }
