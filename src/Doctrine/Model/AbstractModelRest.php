@@ -72,12 +72,11 @@ Abstract Class AbstractModelRest extends AbstractModel implements IModel
             $res = array();
             if (count($arrObjs) > 0)
             {
-                foreach ($arrObjs as $obj)
+                foreach ($arrObjs as $key => $obj)
                 {
-                    $res['content']=  $obj->toArray(null, array('__cloner__', '__isInitialized__', '__initializer__'));
-
+                    $res['data'] [$key] = $obj->toArray();
+                    $res['data'] [$key] = $this->convertObjectToHateoas($obj);
                 }
-
             }
             return $res;
         }
@@ -86,12 +85,29 @@ Abstract Class AbstractModelRest extends AbstractModel implements IModel
         }
     }
 
+    public function mountStructResponse(array $res, array $data) : array
+    {
+        $previousOffset = $data['offset'] - $data['limit'];
+        $previousOffset = ( $previousOffset <= 0 ) ? 0 : $previousOffset;
+        $res['links'] ['previous'] = [
+            "href"      => "/{$class_name}?filters={$data['filters']}&offset={$previousOffset}&limit={$data['limit']}&order={$data['order']}",
+        ];
+
+        $nextOffset = $data['offset'] + $data['limit'];
+        $res['links'] ['next'] = [
+            "href"      => "/{$class_name}?filters={$data['filters']}&offset={$nextOffset}&limit={$data['limit']}&order={$data['order']}",
+        ];
+
+        $res['total'] = count($res['data']);
+
+        return $res;
+    }
 
     public function convertObjectToHateoas($obj)
     {
         $class_name = get_class($obj);
         $arr = $obj->extractObject();
-        $arr["link"] = [
+        $arr["link"] ['_self']= [
             [
                 "rel"       => "self",
                 "href"      => "/{$class_name}/{$obj->getId()}",

@@ -17,15 +17,16 @@ trait ObjectHelpers
      *
      * @return array
      */
-    public function toArray($obj = null, $filterKeys = array())
+    public function toArray( $filterKeys = array(), $obj = null)
     {
+        $filters_default =  array('__cloner__', '__isInitialized__', '__initializer__');
+        $filterKeys = array_merge ($filterKeys, $filters_default);
         $obj = (is_null($obj)) ? $this : $obj;
 
         $arr = (is_object($obj)) ? get_object_vars($obj) : $obj;
 
         foreach( $arr as $key => $val)
         {
-
             if($val instanceof \DateTime)
             {
                 $val->format('Y-m-d H:i:s');

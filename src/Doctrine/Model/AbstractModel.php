@@ -104,7 +104,7 @@ Abstract Class AbstractModel implements IModel
             return  $this->repository->save($obj);
         }
         catch (PDOException $e){
-            throw new PDOException( "{$e->getMessage()} . (AMD0001exc)");
+            throw new PDOException( "{$e->getMessage()} . (ABSMD-01001exc)", 1001);
         }
     }
 
@@ -124,10 +124,10 @@ Abstract Class AbstractModel implements IModel
         try{
             if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
             {
-                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ACCENT013exc)");
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-01003exc)");
             }
-            $this->setData($data);
 
+            $this->setData($data);
             $obj = $this->repository->findOneById($this->getData()['id']);
             if( ! $obj instanceof $this->entityName )
             {
@@ -157,8 +157,9 @@ Abstract Class AbstractModel implements IModel
         {
             if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
             {
-                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ACCENT013exc)");
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-01004exc)");
             }
+
             $obj = $this->repository->findOneById($data['id']);
             if( ! $obj instanceof $this->entityName )
             {
@@ -187,7 +188,7 @@ Abstract Class AbstractModel implements IModel
             {
                 foreach ($arrObjs as $obj)
                 {
-                    $res[]=  $obj->toArray(null, array('__cloner__', '__isInitialized__', '__initializer__'));
+                    $res[]=  $obj->toArray();
                 }
 
             }
@@ -253,7 +254,7 @@ Abstract Class AbstractModel implements IModel
                     $association = $metaData->getAssociationMapping($attr);
                     if ( ! isset($association['targetToSourceKeyColumns']) )
                     {
-                        throw new \Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD00331exc)");
+                        throw new \Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD-01004exc)");
                     }
 
                     $assocAttr = array_keys($association['targetToSourceKeyColumns']);
