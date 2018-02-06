@@ -6,6 +6,9 @@ use Siworks\Slim\Doctrine\Model\IModel;
 
 Abstract class AbstractController
 {
+    const LIMIT  = 10;
+    const OFFSET = 0;
+
     protected $entityManager;
     protected $modelEntity;
     protected $logger;
@@ -124,10 +127,30 @@ Abstract class AbstractController
 
     public function fetchAllAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
+
+
         try
         {
+            $data = $request->getQueryParams();
+
+            $data['filters'] = (isset($data['filters']) && is_array($data['filters'])) ? $data['filters'] : array();
+            $data['order']   = (isset($data['order']) && is_array($data['order']))     ? $data['order']   : array();
+            $data['limit']   = (isset($data['limit']) && is_numeric($data['limit']))   ? $data['limit']   : self::LIMIT;
+            $data['offset']  = (isset($data['offset']) && is_numeric($data['offset'])) ? $data['offset']  : self::OFFSET;
+
             $this->fetchValidate($request->getQueryParams());
-            $results =  $this->modelEntity->findAll($request->getQueryParams());
+            $results =  $this->modelEntity->findAll();
+
+            $res = array();
+            if (count($arrObjs) > 0)
+            {
+                foreach ($arrObjs as $key => $obj)
+                {
+                    $res['data'] [$key] = $obj->toArray();
+                    $res['data'] [$key] = $this->convertObjectToHateoas($obj);
+                }
+            }
+
             return $response->withJSON($results);
 
         }
@@ -156,7 +179,7 @@ Abstract class AbstractController
     {
         if (isset($args['filters']) && ! is_array($args['filters']) )
         {
-            throw new \InvalidArgumentException("Attribute 'filters' is required or is not array");
+            throw new \InvalidArgumentException("Attribute 'filters' is required or is not array (ABSCTR-040034exc)");
         }
 
         if ( isset($args['order']) && count(array_intersect(array('asc','desc'), array_values($args['order']))) ==0 )
@@ -197,8 +220,36 @@ Abstract class AbstractController
                     ];
                 break;
         }
-
-
     }
 
+    public function mountStructResponse(array $res, array $data) : array
+    {
+        $previousOffset = $data['offset'] - $data['limit'];
+        $previousOffset = ( $previousOffset <= 0 ) ? 0 : $previousOffset;
+        $res['links'] ['previous'] = [
+            "href"      => "/{$class_name}?filters={$data['filters']}&offset={$previousOffset}&limit={$data['limit']}&order={$data['order']}",
+        ];
+
+        $nextOffset = $data['offset'] + $data['limit'];
+        $res['links'] ['next'] = [
+            "href"      => "/{$class_name}?filters={$data['filters']}&offset={$nextOffset}&limit={$data['limit']}&order={$data['order']}",
+        ];
+
+        $res['total'] = count($res['data']);
+
+        return $res;
+    }
+
+    public function convertObjectToHateoas($obj)
+    {
+        $class_name = get_class($obj);
+        $arr = $obj->extractObject();
+        $arr["link"] ['_self']= [
+            [
+                "rel"       => "self",
+                "href"      => "/{$class_name}/{$obj->getId()}",
+                "method"    => "get"
+            ],
+        ];
+    }
 }
