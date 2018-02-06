@@ -4,7 +4,7 @@ namespace Siworks\Slim\Doctrine\Controller;
 use Doctrine\ORM\EntityManager;
 use Siworks\Slim\Doctrine\Model\IModel;
 
-Abstract class AbstractController
+Abstract class AbstractRestController
 {
     const LIMIT  = 10;
     const OFFSET = 0;
@@ -85,7 +85,6 @@ Abstract class AbstractController
         }
         catch (\Exception $e){
             //trato aqui
-
             return $response->withJSON($entityObject->extractObject());
         }
 
@@ -127,18 +126,9 @@ Abstract class AbstractController
 
     public function fetchAllAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-
-
         try
         {
-            $data = $request->getQueryParams();
-
-            $data['filters'] = (isset($data['filters']) && is_array($data['filters'])) ? $data['filters'] : array();
-            $data['order']   = (isset($data['order']) && is_array($data['order']))     ? $data['order']   : array();
-            $data['limit']   = (isset($data['limit']) && is_numeric($data['limit']))   ? $data['limit']   : self::LIMIT;
-            $data['offset']  = (isset($data['offset']) && is_numeric($data['offset'])) ? $data['offset']  : self::OFFSET;
-
-            $this->fetchValidate($request->getQueryParams());
+            $data = $this->fetchValidate($request->getQueryParams());
             $results =  $this->modelEntity->findAll();
 
             $res = array();
@@ -175,19 +165,25 @@ Abstract class AbstractController
 //        return $response->withStatus(404, 'No photo found with slug '.$args['slug']);
 //    }
 
-    public function fetchValidate(Array $args)
+    public function fetchValidate(Array $data)
     {
-        if (isset($args['filters']) && ! is_array($args['filters']) )
+
+        $data['filters'] = (isset($data['filters']) && is_array($data['filters'])) ? $data['filters'] : array();
+        $data['order']   = (isset($data['order']) && is_array($data['order']))     ? $data['order']   : array();
+        $data['limit']   = (isset($data['limit']) && is_numeric($data['limit']))   ? $data['limit']   : self::LIMIT;
+        $data['offset']  = (isset($data['offset']) && is_numeric($data['offset'])) ? $data['offset']  : self::OFFSET;
+
+        if (isset($data['filters']) && ! is_array($data['filters']) )
         {
             throw new \InvalidArgumentException("Attribute 'filters' is required or is not array (ABSCTR-040034exc)");
         }
 
-        if ( isset($args['order']) && count(array_intersect(array('asc','desc'), array_values($args['order']))) ==0 )
+        if ( isset($data['order']) && count(array_intersect(array('asc','desc'), array_values($data['order']))) ==0 )
         {
             throw new \InvalidArgumentException("value 'orders' is invalid required [asc, desc] (ABMD00035exc)");
         }
 
-        return $args;
+        return $data;
     }
 
     public function getPatternResponseRestFull ($action, $data, \Psr\Http\Message\ResponseInterface $response)
