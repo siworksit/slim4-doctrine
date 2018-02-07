@@ -20,9 +20,6 @@ Abstract Class AbstractModel implements IModel
 {
     use ObjectHelpers;
 
-    const LIMIT  = 10;
-    const OFFSET = 0;
-
     /**
      * @var EntityManager
      */
@@ -41,9 +38,7 @@ Abstract Class AbstractModel implements IModel
 
     /**
      * @var array data
-     *
      */
-
     protected $data = array();
 
     /**
@@ -104,7 +99,7 @@ Abstract Class AbstractModel implements IModel
             return  $this->repository->save($obj);
         }
         catch (PDOException $e){
-            throw new PDOException( "{$e->getMessage()} . (AMD0001exc)");
+            throw new PDOException( "{$e->getMessage()} . (ABSMD-02001exc)", 02001);
         }
     }
 
@@ -124,10 +119,10 @@ Abstract Class AbstractModel implements IModel
         try{
             if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
             {
-                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ACCENT013exc)");
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-02002exc)", 02002);
             }
-            $this->setData($data);
 
+            $this->setData($data);
             $obj = $this->repository->findOneById($this->getData()['id']);
             if( ! $obj instanceof $this->entityName )
             {
@@ -142,7 +137,7 @@ Abstract Class AbstractModel implements IModel
             return $obj;
         }
         catch (PDOException $e){
-            throw new PDOException( "{$e->getMessage()} . (AMD0001exc)");
+            throw new PDOException( "{$e->getMessage()} . (ABSMD-02003exc)", 02003);
         }
     }
 
@@ -157,8 +152,9 @@ Abstract Class AbstractModel implements IModel
         {
             if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
             {
-                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ACCENT013exc)");
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-02004exc)", 02004);
             }
+
             $obj = $this->repository->findOneById($data['id']);
             if( ! $obj instanceof $this->entityName )
             {
@@ -168,29 +164,15 @@ Abstract Class AbstractModel implements IModel
             return $res;
         }
         catch (PDOException $e){
-            throw new PDOException($e->getMessage() . " (AMD0003exc)");
+            throw new PDOException($e->getMessage() . " (ABSMD-02005exc)", 02005);
         }
     }
 
     public function findAll(array $data)
     {
-        $data['filters'] = (isset($data['filters']) && is_array($data['filters'])) ? $data['filters'] : array();
-        $data['order']   = (isset($data['order']) && is_array($data['order']))     ? $data['order']   : array();
-        $data['limit']   = (isset($data['limit']) && is_numeric($data['limit']))   ? $data['limit']   : self::LIMIT;
-        $data['offset']  = (isset($data['offset']) && is_numeric($data['offset'])) ? $data['offset']  : self::OFFSET;
-
         try
         {
-            $arrObjs = $this->repository->getSimpleListBy($data['filters'], $data['order'], $data['limit'], $data['offset']);
-            $res = array();
-            if (count($arrObjs) > 0)
-            {
-                foreach ($arrObjs as $obj)
-                {
-                    $res[]=  $obj->toArray(null, array('__cloner__', '__isInitialized__', '__initializer__'));
-                }
-
-            }
+            $res = $this->repository->getSimpleListBy($data['filters'], $data['order'], $data['limit'], $data['offset']);
             return $res;
         }
         catch(\PDOException $e){
@@ -253,7 +235,7 @@ Abstract Class AbstractModel implements IModel
                     $association = $metaData->getAssociationMapping($attr);
                     if ( ! isset($association['targetToSourceKeyColumns']) )
                     {
-                        throw new \Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD00331exc)");
+                        throw new \Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD-02006exc)", 02006);
                     }
 
                     $assocAttr = array_keys($association['targetToSourceKeyColumns']);
@@ -290,7 +272,6 @@ Abstract Class AbstractModel implements IModel
     public function setRepository(EntityRepository $repository)
     {
         $this->repository = $repository;
-
         return $this;
     }
 

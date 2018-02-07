@@ -4,8 +4,11 @@ namespace Siworks\Slim\Doctrine\Controller;
 use Doctrine\ORM\EntityManager;
 use Siworks\Slim\Doctrine\Model\IModel;
 
-Abstract class AbstractController
+Abstract class AbstractRestController
 {
+    const LIMIT  = 10;
+    const OFFSET = 0;
+
     protected $entityManager;
     protected $modelEntity;
     protected $logger;
@@ -81,8 +84,8 @@ Abstract class AbstractController
 
         }
         catch (\Exception $e){
+            echo $e->getMessage(); exit;
             //trato aqui
-
             return $response->withJSON($entityObject->extractObject());
         }
 
@@ -126,10 +129,20 @@ Abstract class AbstractController
     {
         try
         {
-            $this->fetchValidate($request->getQueryParams());
-            $results =  $this->modelEntity->findAll($request->getQueryParams());
-            return $response->withJSON($results);
+            $data = $this->fetchValidate($request->getQueryParams());
+            $results =  $this->modelEntity->findAll($data);
 
+            $res ['data']= [];
+            if (count($results['data']) > 0)
+            {
+                foreach ($results['data'] as $key => $obj)
+                {
+                    $res['data'] [$key] = $obj->toArray();
+                    $res['data'] [$key] ['link']= $this->convertObjectToHateoas($obj);
+                }
+            }
+            $res = $this->mountStructResponse($res, $data, $request);
+            return $response->withJSON($res);
         }
         catch (\Exception $e) {
             //trato aqui
@@ -141,30 +154,37 @@ Abstract class AbstractController
     /**
      * @TODO make method fetchOneAction
      */
-//    public function fetchOneAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
-//    {
-//        $this->fetchValidate($request->getQueryParams());
-//        $entity = $this->modelEntity->findOne($this->fetchValidate($request->getQueryParams()));
-//        if ($entity)
-//        {
-//            return $response->withJSON(get_object_vars($entity));
-//        }
-//        return $response->withStatus(404, 'No photo found with slug '.$args['slug']);
-//    }
-
-    public function fetchValidate(Array $args)
+    public function fetchAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
-        if (isset($args['filters']) && ! is_array($args['filters']) )
+        $this->fetchValidate($args);
+        $entity = $this->modelEntity->findOne(['id' => $args]);
+        if ($entity)
         {
-            throw new \InvalidArgumentException("Attribute 'filters' is required or is not array");
+            $res = $this->convertObjectToHateoas($obj);
+            return $response->withJSON(get_object_vars($entity));
+        }
+    }
+
+    public function fetchValidate(Array $data)
+    {
+        $data['filters'] = (isset($data['filters']) && is_array($data['filters'])) ? $data['filters'] : array();
+        $data['order']   = (isset($data['order']) && is_array($data['order']))     ? $data['order']   : array();
+        $data['limit']   = (isset($data['limit']) && is_numeric($data['limit']))   ? $data['limit']   : self::LIMIT;
+        $data['offset']  = (isset($data['offset']) && is_numeric($data['offset'])) ? $data['offset']  : self::OFFSET;
+
+        if (isset($data['filters']) && ! is_array($data['filters']) )
+        {
+            throw new \InvalidArgumentException("Attribute 'filters' is not array (ABSRESCT-04001exc)", 04001);
         }
 
-        if ( isset($args['order']) && count(array_intersect(array('asc','desc'), array_values($args['order']))) ==0 )
+        if ( isset($data['order']) && count(array_intersect(array('asc','desc'), array_values($data['order']))) != 0 )
         {
-            throw new \InvalidArgumentException("value 'orders' is invalid required [asc, desc] (ABMD00035exc)");
+            throw new \InvalidArgumentException("value 'orders' is invalid required [asc, desc] (ABSRESCT-04002exc)", 04002);
         }
 
-        return $args;
+        unset($data['access_token']);
+
+        return $data;
     }
 
     public function getPatternResponseRestFull ($action, $data, \Psr\Http\Message\ResponseInterface $response)
@@ -197,8 +217,47 @@ Abstract class AbstractController
                     ];
                 break;
         }
-
-
     }
 
+    public function mountStructResponse(array $res, array $data, \Psr\Http\Message\ServerRequestInterface $request) : array
+    {
+        $previousOffset = $data['offset'] - $data['limit'];
+        $previousOffset = ( $previousOffset <= 0 ) ? 0 : $previousOffset;
+
+        $nextOffset = $data['offset'] + $data['limit'];
+
+        $uri = $request->getUri()->getPath();
+
+        if(count($filters))
+        {
+            $filters = implode(',', $data['filters']);
+            $filters = "filters={$filters}&";
+        }
+
+        $res['_links'] = [
+            'previous' => [
+                "href"      => "{$uri}?{$filters}offset={$previousOffset}&limit={$data['limit']}&order={$data['order']}",
+            ],
+            'next' => [
+                "href"      => "{$uri}?{$filters}offset={$nextOffset}&limit={$data['limit']}&order={$data['order']}",
+            ]
+        ];
+
+        $res['total'] = count($res['data']);
+
+        return $res;
+    }
+
+    public function convertObjectToHateoas($obj)
+    {
+        $class_name = get_class($obj);
+        $arr = $obj->extractObject();
+        $arr["link"] ['_self']= [
+            [
+                "rel"       => "self",
+                "href"      => "/{$class_name}/{$obj->getId()}",
+                "method"    => "get"
+            ],
+        ];
+    }
 }

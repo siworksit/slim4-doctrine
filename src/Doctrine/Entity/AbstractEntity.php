@@ -42,9 +42,9 @@ Abstract class AbstractEntity
             {
                 return $this->$field;
             }
-            throw new \RuntimeException('The method is not defined. (ABSENT0002exc)');
+            throw new \RuntimeException('The method is not defined. (ABSENT-00001exc)', 00001);
         }
 
-        throw new \InvalidArgumentException('Attribute does not exist. (ABSENT0001exc)');
+        throw new \InvalidArgumentException('Attribute does not exist. (ABSENT-00002exc)', 00002);
     }
 }

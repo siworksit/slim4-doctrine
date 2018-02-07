@@ -17,15 +17,17 @@ trait ObjectHelpers
      *
      * @return array
      */
-    public function toArray($obj = null, $filterKeys = array())
+    public function toArray( $filterKeys = array(), $obj = null)
     {
-        $obj = (is_null($obj)) ? $this : $obj;
+        $filters_default =  array('__cloner__', '__isInitialized__', '__initializer__');
+        $filterKeys = array_merge ($filterKeys, $filters_default);
+        $name = get_class($obj);
 
+        $obj = (is_null($obj)) ? $this : $obj;
         $arr = (is_object($obj)) ? get_object_vars($obj) : $obj;
 
         foreach( $arr as $key => $val)
         {
-
             if($val instanceof \DateTime)
             {
                 $val->format('Y-m-d H:i:s');
@@ -33,19 +35,18 @@ trait ObjectHelpers
             }
             else if(is_object($val))
             {
-                $arr[$key] = $this->toArray($val, $filterKeys);
+                $arr[$key] = $this->toArray($filterKeys, $val);
+            }
+
+            if(count($filterKeys) > 0)
+            {
+                $arr = array_filter($arr, function($key) use ($filterKeys)
+                {
+                    return ( ! in_array($key, $filterKeys) );
+
+                },ARRAY_FILTER_USE_KEY);
             }
         }
-
-        if(count($filterKeys) > 0)
-        {
-            $arr = array_filter($arr, function($key) use ($filterKeys)
-            {
-                return ( ! in_array($key, $filterKeys) );
-
-            },ARRAY_FILTER_USE_KEY);
-        }
-
         return $arr;
     }
 
