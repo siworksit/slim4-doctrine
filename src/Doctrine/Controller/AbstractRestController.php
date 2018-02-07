@@ -84,6 +84,7 @@ Abstract class AbstractRestController
 
         }
         catch (\Exception $e){
+            echo $e->getMessage(); exit;
             //trato aqui
             return $response->withJSON($entityObject->extractObject());
         }
@@ -129,20 +130,19 @@ Abstract class AbstractRestController
         try
         {
             $data = $this->fetchValidate($request->getQueryParams());
-            $results =  $this->modelEntity->findAll();
+            $results =  $this->modelEntity->findAll($data);
 
-            $res = array();
-            if (count($arrObjs) > 0)
+            $res ['data']= [];
+            if (count($results['data']) > 0)
             {
-                foreach ($arrObjs as $key => $obj)
+                foreach ($results['data'] as $key => $obj)
                 {
                     $res['data'] [$key] = $obj->toArray();
-                    $res['data'] [$key] = $this->convertObjectToHateoas($obj);
+                    $res['data'] [$key] ['link']= $this->convertObjectToHateoas($obj);
                 }
             }
-
-            return $response->withJSON($results);
-
+            $res = $this->mountStructResponse($res, $data, $request);
+            return $response->withJSON($res);
         }
         catch (\Exception $e) {
             //trato aqui
@@ -154,20 +154,19 @@ Abstract class AbstractRestController
     /**
      * @TODO make method fetchOneAction
      */
-//    public function fetchOneAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
-//    {
-//        $this->fetchValidate($request->getQueryParams());
-//        $entity = $this->modelEntity->findOne($this->fetchValidate($request->getQueryParams()));
-//        if ($entity)
-//        {
-//            return $response->withJSON(get_object_vars($entity));
-//        }
-//        return $response->withStatus(404, 'No photo found with slug '.$args['slug']);
-//    }
+    public function fetchAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
+    {
+        $this->fetchValidate($args);
+        $entity = $this->modelEntity->findOne(['id' => $args]);
+        if ($entity)
+        {
+            $res = $this->convertObjectToHateoas($obj);
+            return $response->withJSON(get_object_vars($entity));
+        }
+    }
 
     public function fetchValidate(Array $data)
     {
-
         $data['filters'] = (isset($data['filters']) && is_array($data['filters'])) ? $data['filters'] : array();
         $data['order']   = (isset($data['order']) && is_array($data['order']))     ? $data['order']   : array();
         $data['limit']   = (isset($data['limit']) && is_numeric($data['limit']))   ? $data['limit']   : self::LIMIT;
@@ -175,13 +174,15 @@ Abstract class AbstractRestController
 
         if (isset($data['filters']) && ! is_array($data['filters']) )
         {
-            throw new \InvalidArgumentException("Attribute 'filters' is required or is not array (ABSCTR-040034exc)");
+            throw new \InvalidArgumentException("Attribute 'filters' is not array (ABSRESCT-04001exc)", 04001);
         }
 
-        if ( isset($data['order']) && count(array_intersect(array('asc','desc'), array_values($data['order']))) ==0 )
+        if ( isset($data['order']) && count(array_intersect(array('asc','desc'), array_values($data['order']))) != 0 )
         {
-            throw new \InvalidArgumentException("value 'orders' is invalid required [asc, desc] (ABMD00035exc)");
+            throw new \InvalidArgumentException("value 'orders' is invalid required [asc, desc] (ABSRESCT-04002exc)", 04002);
         }
+
+        unset($data['access_token']);
 
         return $data;
     }
@@ -218,17 +219,28 @@ Abstract class AbstractRestController
         }
     }
 
-    public function mountStructResponse(array $res, array $data) : array
+    public function mountStructResponse(array $res, array $data, \Psr\Http\Message\ServerRequestInterface $request) : array
     {
         $previousOffset = $data['offset'] - $data['limit'];
         $previousOffset = ( $previousOffset <= 0 ) ? 0 : $previousOffset;
-        $res['links'] ['previous'] = [
-            "href"      => "/{$class_name}?filters={$data['filters']}&offset={$previousOffset}&limit={$data['limit']}&order={$data['order']}",
-        ];
 
         $nextOffset = $data['offset'] + $data['limit'];
-        $res['links'] ['next'] = [
-            "href"      => "/{$class_name}?filters={$data['filters']}&offset={$nextOffset}&limit={$data['limit']}&order={$data['order']}",
+
+        $uri = $request->getUri()->getPath();
+
+        if(count($filters))
+        {
+            $filters = implode(',', $data['filters']);
+            $filters = "filters={$filters}&";
+        }
+
+        $res['_links'] = [
+            'previous' => [
+                "href"      => "{$uri}?{$filters}offset={$previousOffset}&limit={$data['limit']}&order={$data['order']}",
+            ],
+            'next' => [
+                "href"      => "{$uri}?{$filters}offset={$nextOffset}&limit={$data['limit']}&order={$data['order']}",
+            ]
         ];
 
         $res['total'] = count($res['data']);
