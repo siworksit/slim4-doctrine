@@ -38,9 +38,7 @@ Abstract Class AbstractModel implements IModel
 
     /**
      * @var array data
-     *
      */
-
     protected $data = array();
 
     /**
@@ -101,7 +99,7 @@ Abstract Class AbstractModel implements IModel
             return  $this->repository->save($obj);
         }
         catch (PDOException $e){
-            throw new PDOException( "{$e->getMessage()} . (ABSMD-01001exc)", 1001);
+            throw new PDOException( "{$e->getMessage()} . (ABSMD-02001exc)", 02001);
         }
     }
 
@@ -121,7 +119,7 @@ Abstract Class AbstractModel implements IModel
         try{
             if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
             {
-                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-01003exc)");
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-02002exc)", 02002);
             }
 
             $this->setData($data);
@@ -139,7 +137,7 @@ Abstract Class AbstractModel implements IModel
             return $obj;
         }
         catch (PDOException $e){
-            throw new PDOException( "{$e->getMessage()} . (AMD0001exc)");
+            throw new PDOException( "{$e->getMessage()} . (ABSMD-02003exc)", 02003);
         }
     }
 
@@ -154,7 +152,7 @@ Abstract Class AbstractModel implements IModel
         {
             if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
             {
-                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-01004exc)");
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-02004exc)", 02004);
             }
 
             $obj = $this->repository->findOneById($data['id']);
@@ -166,7 +164,7 @@ Abstract Class AbstractModel implements IModel
             return $res;
         }
         catch (PDOException $e){
-            throw new PDOException($e->getMessage() . " (AMD0003exc)");
+            throw new PDOException($e->getMessage() . " (ABSMD-02005exc)", 02005);
         }
     }
 
@@ -174,7 +172,7 @@ Abstract Class AbstractModel implements IModel
     {
         try
         {
-            $arrObjs = $this->repository->getSimpleListBy($data['filters'], $data['order'], $data['limit'], $data['offset']);
+            $res = $this->repository->getSimpleListBy($data['filters'], $data['order'], $data['limit'], $data['offset']);
             return $res;
         }
         catch(\PDOException $e){
@@ -237,7 +235,7 @@ Abstract Class AbstractModel implements IModel
                     $association = $metaData->getAssociationMapping($attr);
                     if ( ! isset($association['targetToSourceKeyColumns']) )
                     {
-                        throw new \Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD-01004exc)");
+                        throw new \Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD-02006exc)", 02006);
                     }
 
                     $assocAttr = array_keys($association['targetToSourceKeyColumns']);
