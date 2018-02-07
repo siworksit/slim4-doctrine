@@ -8,6 +8,7 @@ namespace Siworks\Slim\Doctrine\Repository;
  */
 
 use Doctrine\DBAL\Exception\InvalidArgumentException as InvalidArgumentException;
+use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\ORMInvalidArgumentException as ORMInvalidArgumentException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
@@ -18,7 +19,6 @@ use Doctrine\ORM\Mapping;
 
 Abstract class AbstractRepository extends EntityRepository
 {
-
 
     /**
      * Get single entity object by Id
@@ -64,11 +64,14 @@ Abstract class AbstractRepository extends EntityRepository
         {
             if ( ! $this->checkAttrib($criteria) )
             {
-                $message = InvalidArgumentException::noColumnsSpecifiedForTable($this->getEntityName())->getMessage() . "(ABSREP00012exc)";
-                throw new \InvalidArgumentException($message);
+                $message = InvalidArgumentException::noColumnsSpecifiedForTable($this->getEntityName())->getMessage() . "(ABSREP-01001exc)";
+                throw new \InvalidArgumentException($message,01001);
             }
 
-            return $this->getEntityManager()->getRepository($this->_entityName)->findBy($criteria, $orderBy, $limit, $offset);
+            $res['data'] = $this->getEntityManager()->getRepository($this->_entityName)->findBy($criteria, $orderBy, $limit, $offset);
+            $res['count'] = count($this->getEntityManager()->getRepository($this->_entityName)->findBy($criteria));
+
+            return $res;
         }
         catch(\Exception $e)
         {
@@ -91,7 +94,7 @@ Abstract class AbstractRepository extends EntityRepository
 
             if ( ! $this->checkAttrib([$this->_entityName, array_keys($filters)]) )
             {
-                throw new \Doctrine\ORM\ORMInvalidArgumentException ("Invalid attribute filter (ACCREP exc001)");
+                throw new \Doctrine\ORM\ORMInvalidArgumentException ("Invalid attribute filter (ABSREP-01002exc)",01002);
             }
 
             $qb = $this->createQueryBuilder('i');
@@ -112,7 +115,6 @@ Abstract class AbstractRepository extends EntityRepository
             {
                 $qb = $this->createOrderBy($filters['orderBy'], $qb);
             }
-
             $query = $qb->getQuery();
 
             return $this->getPaginate(null,null, $query);
@@ -127,16 +129,13 @@ Abstract class AbstractRepository extends EntityRepository
         }
     }
 
-
     public function checkAttrib(array $list)
     {
-
         $list_filtred = $this->getAttributesList($list);
         if ( ! class_exists($this->_entityName) )
         {
-            throw new ClassNotFoundException("Namespace {$this->_entityName} not found (ABSREP0011exc)", new \ErrorException());
+            throw new EntityNotFoundException("Namespace {$this->_entityName} not found (ABSREP-01003exc)", 01003);
         }
-
 
         foreach ($list_filtred as $attrib => $values)
         {
@@ -228,7 +227,7 @@ Abstract class AbstractRepository extends EntityRepository
     public function getPaginate( $offset = 0, $limit = 10, $query)
     {
         if(!$query instanceof Query){
-            throw new ORMInvalidArgumentException ("Must be an instance of Doctrine\ORM\Query, instance of ".get_class($query)." given (ABSREP0015exc)");
+            throw new ORMInvalidArgumentException ("Must be an instance of Doctrine\ORM\Query, instance of ".get_class($query)." given (ABSREP-01004exc)", 01004);
         }
         $paginator = new Paginator($query->getDQL());
 
@@ -255,7 +254,7 @@ Abstract class AbstractRepository extends EntityRepository
         }
         catch(\Doctrine\ORM\ORMInvalidArgumentException $e) {
 
-            throw \Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0001exc)");
+            throw \Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP-01005exc)", 01005);
         }
         catch(\Exception $e) {
             throw $e;
@@ -272,7 +271,7 @@ Abstract class AbstractRepository extends EntityRepository
         }
         catch(\Doctrine\ORM\ORMInvalidArgumentException $e)
         {
-            throw \Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP0002exc)");
+            throw \Doctrine\ORM\ORMInvalidArgumentException ($e->getMessage() . "(ABSREP-01006exc)", 01006);
         }
         catch(\Exception $e)
         {
