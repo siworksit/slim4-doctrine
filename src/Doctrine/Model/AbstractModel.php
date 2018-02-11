@@ -8,6 +8,7 @@
 
 namespace Siworks\Slim\Doctrine\Model;
 
+use Doctrine\ORM\ORMInvalidArgumentException;
 use Siworks\Slim\Doctrine\Traits\Helpers\ObjectHelpers;
 use Doctrine\Common\Collections\ArrayCollection;
 use Ramsey\Uuid\Uuid as Uuid;
@@ -99,7 +100,7 @@ Abstract Class AbstractModel implements IModel
             return  $this->repository->save($obj);
         }
         catch (PDOException $e){
-            throw new PDOException( "{$e->getMessage()} . (ABSMD-02001exc)", 02001);
+            throw new PDOException( "{$e->getMessage()} . (ABSMD-2001exc)", 2001);
         }
     }
 
@@ -114,19 +115,20 @@ Abstract Class AbstractModel implements IModel
      * @return Object | NULL
      * @throws \Exception
      */
-    public function update(array $data)
+    public function update($args, array $data)
     {
         try{
-            if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
+            if ( ! isset($args) || (! Uuid::isValid($args) && !is_numeric($args)) )
             {
-                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-02002exc)", 02002);
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-2002exc)", 2002);
             }
 
             $this->setData($data);
-            $obj = $this->repository->findOneById($this->getData()['id']);
+            $obj = $this->repository->findOneById($args);
+
             if( ! $obj instanceof $this->entityName )
             {
-                return null;
+                throw new InvalidArgumentException("Object {$this->entityName} is not found by {$args} (ABSMD-2007exc)",2007);
             }
 
             $obj = $this->populateAssociation($obj);
@@ -137,7 +139,7 @@ Abstract Class AbstractModel implements IModel
             return $obj;
         }
         catch (PDOException $e){
-            throw new PDOException( "{$e->getMessage()} . (ABSMD-02003exc)", 02003);
+            throw new PDOException( "{$e->getMessage()} . (ABSMD-2003exc)", 2003);
         }
     }
 
@@ -152,7 +154,7 @@ Abstract Class AbstractModel implements IModel
         {
             if ( ! isset($data['id']) || (! Uuid::isValid($data['id']) && !is_numeric($data['id'])) )
             {
-                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-02004exc)", 02004);
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-2008exc)", 2008);
             }
 
             $obj = $this->repository->findOneById($data['id']);
@@ -164,7 +166,7 @@ Abstract Class AbstractModel implements IModel
             return $res;
         }
         catch (PDOException $e){
-            throw new PDOException($e->getMessage() . " (ABSMD-02005exc)", 02005);
+            throw new PDOException($e->getMessage() . " (ABSMD-2005exc)", 2005);
         }
     }
 
@@ -172,7 +174,24 @@ Abstract Class AbstractModel implements IModel
     {
         try
         {
-            $res = $this->repository->getSimpleListBy($data['filters'], $data['order'], $data['limit'], $data['offset']);
+            $res = $this->repository->getSimpleListBy($data['filters'], $data['order'], $data['offset'], $data['limit']);
+            return $res;
+        }
+        catch(\PDOException $e){
+            throw $e;
+        }
+    }
+
+    public function findOne($args)
+    {
+        try
+        {
+            if ( ! isset($args) || (! Uuid::isValid($args) && !is_numeric($args)) )
+            {
+                throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-2004exc)", 2004);
+            }
+
+            $res = $this->repository->findOneById($args);
             return $res;
         }
         catch(\PDOException $e){
@@ -235,7 +254,7 @@ Abstract Class AbstractModel implements IModel
                     $association = $metaData->getAssociationMapping($attr);
                     if ( ! isset($association['targetToSourceKeyColumns']) )
                     {
-                        throw new \Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD-02006exc)", 02006);
+                        throw new \Doctrine\ORM\ORMInvalidArgumentException("This relation is inversed (ABSMD-2006exc)", 2006);
                     }
 
                     $assocAttr = array_keys($association['targetToSourceKeyColumns']);
@@ -274,5 +293,4 @@ Abstract Class AbstractModel implements IModel
         $this->repository = $repository;
         return $this;
     }
-
 }
