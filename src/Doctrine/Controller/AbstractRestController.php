@@ -84,9 +84,8 @@ Abstract class AbstractRestController
 
         }
         catch (\Exception $e){
-            echo $e->getMessage(); exit;
-            //trato aqui
-            return $response->withJSON($entityObject->extractObject());
+            $res = $this->responseException($e);
+            return $response->withJSON($res);
         }
 
     }
@@ -103,10 +102,11 @@ Abstract class AbstractRestController
             $entityObject = $this->modelEntity->update($args, $data);
             $data = $this->getPatternResponseRestFull("PUT", $entityObject->extractObject());
 
-            return $response->withJSON();
+            return $response->withJSON($data);
         } catch (\Exception $e) {
             //trato aqui
-            return $response->withJSON($entityObject->extractObject());
+            $res = $this->responseException($e);
+            return $response->withJSON($res);
         }
     }
 
@@ -116,12 +116,11 @@ Abstract class AbstractRestController
         {
             $entityObject =  $this->modelEntity->remove($request->getQueryParams());
             return $response->withJSON($entityObject->extractObject());
-
         }
         catch (\Exception $e) {
             //trato aqui
-
-            return $response->withJSON($entityObject->extractObject());
+            $res = $this->responseException($e);
+            return $response->withJSON($res);
         }
     }
 
