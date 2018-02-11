@@ -69,7 +69,7 @@ Abstract class AbstractRepository extends EntityRepository
             }
 
             $res['data'] = $this->getEntityManager()->getRepository($this->_entityName)->findBy($criteria, $orderBy, $limit, $offset);
-            $res['count'] = count($this->getEntityManager()->getRepository($this->_entityName)->findBy($criteria));
+            $res['count'] = $this->getEntityManager()->getRepository($this->_entityName)->count($criteria);
 
             return $res;
         }
@@ -169,6 +169,7 @@ Abstract class AbstractRepository extends EntityRepository
      *
      * @param array $arr
      * @param QueryBuilder $qb
+     *
      *
      * @return QueryBuilder
      */
