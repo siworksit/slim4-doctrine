@@ -9,7 +9,6 @@
  */
 namespace Siworks\Slim\Doctrine\Entity;
 
-
 use Siworks\Slim\Doctrine\Traits\Entity\TimeStampable;
 use Siworks\Slim\Doctrine\Traits\Helpers\ObjectHelpers;
 use Doctrine\ORM\Mapping as ORM;
@@ -21,10 +20,8 @@ use Exchanger\Exception\Exception;
  */
 Abstract class AbstractEntity
 {
-
     use TimeStampable,
         ObjectHelpers;
-
 
     public function __call($methodName, $params = null)
     {
@@ -42,9 +39,8 @@ Abstract class AbstractEntity
             {
                 return $this->$field;
             }
-            throw new \RuntimeException('The method is not defined. (ABSENT-00001exc)', 00001);
+            throw new \RuntimeException('The method is not defined. (ABSENT-11001exc)', 11001);
         }
-
-        throw new \InvalidArgumentException('Attribute does not exist. (ABSENT-00002exc)', 00002);
+        throw new \InvalidArgumentException('Attribute does not exist. (ABSENT-11002exc)', 11002);
     }
 }
