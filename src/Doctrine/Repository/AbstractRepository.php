@@ -69,7 +69,7 @@ Abstract class AbstractRepository extends EntityRepository
             }
 
             $res['data'] = $this->getEntityManager()->getRepository($this->_entityName)->findBy($criteria, $orderBy, $limit, $offset);
-            $res['count'] = count($this->getEntityManager()->getRepository($this->_entityName)->findBy($criteria));
+            $res['count'] = $this->getEntityManager()->getRepository($this->_entityName)->count($criteria);
 
             return $res;
         }
@@ -129,6 +129,12 @@ Abstract class AbstractRepository extends EntityRepository
         }
     }
 
+    /**
+     * check list attributes is exist in entity object
+     *
+     * @param array $list
+     * @return bool
+     */
     public function checkAttrib(array $list)
     {
         $list_filtred = $this->getAttributesList($list);
@@ -214,8 +220,20 @@ Abstract class AbstractRepository extends EntityRepository
         }
     }
 
+    /**
+     * Create "Order by" in DQL instruction
+     *
+     * @param array $arr
+     * @param $dql
+     */
     public function createOrderBy(Array $arr, $dql){}
 
+    /**
+     * Create "Group by" in DQL instruction
+     *
+     * @param array $arr
+     * @param $dql
+     */
     public function createGroupBy(Array $arr, $dql){}
 
     /**
