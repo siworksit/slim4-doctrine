@@ -130,8 +130,8 @@ Abstract class AbstractRestController
         {
             $data = $this->fetchValidate($request->getQueryParams());
             $results =  $this->modelEntity->findAll($data);
+            $res ['data'] = [];
 
-            $res ['data']= [];
             if (count($results['data']) > 0)
             {
                 foreach ($results['data'] as $key => $obj)
@@ -145,6 +145,8 @@ Abstract class AbstractRestController
                     ];
                 }
             }
+
+            $res['count'] = $results['count'];
             $res = $this->mountStructResponse($res, $data, $request);
             return $response->withJSON($res);
         }
@@ -254,8 +256,6 @@ Abstract class AbstractRestController
                 "href"      => "{$uri}?{$filters}{$order}offset={$nextOffset}&limit={$data['limit']}",
             ]
         ];
-
-        $res['total'] = count($res['data']);
 
         return $res;
     }
