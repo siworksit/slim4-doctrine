@@ -84,8 +84,8 @@ Abstract class AbstractRestController
 
         }
         catch (\Exception $e){
-            $res = $this->responseException($e);
-            return $response->withJSON($res);
+            $response = $this->respondWithError($e, $response);
+            return $response;
         }
 
     }
@@ -147,13 +147,12 @@ Abstract class AbstractRestController
             }
 
             $res['count'] = $results['count'];
-            $res = $this->mountStructResponse($res, $data, $request);
+            $res = $this->mountListResponse($res, $data, $request);
             return $response->withJSON($res);
         }
         catch (\Exception $e) {
             //trato aqui
-
-            return $response->withJSON($entityObject->extractObject());
+            return $response->withJSON($obj->extractObject());
         }
     }
 
@@ -236,11 +235,10 @@ Abstract class AbstractRestController
         return $arrResp;
     }
 
-    public function mountStructResponse(array $res, array $data, \Psr\Http\Message\ServerRequestInterface $request) : array
+    public function mountListResponse(array $res, array $data, \Psr\Http\Message\ServerRequestInterface $request) : array
     {
         $previousOffset = $data['offset'] - $data['limit'];
         $previousOffset = ( $previousOffset <= 0 ) ? 0 : $previousOffset;
-
         $nextOffset = $data['offset'] + $data['limit'];
 
         $uri = $request->getUri()->getPath();
@@ -248,6 +246,8 @@ Abstract class AbstractRestController
         $filters = $this->implodeQueryParams('filters', $data['filters']);
         $order = $this->implodeQueryParams('order', $data['order']);
 
+        $res['current_page'] = ceil($data['offset']/$data['limit']);;
+        $res['total_pages'] = ceil($res['count']/$data['limit']);
         $res['_links'] = [
             'previous' => [
                 "href"      => "{$uri}?{$filters}{$order}offset={$previousOffset}&limit={$data['limit']}",
@@ -273,8 +273,8 @@ Abstract class AbstractRestController
         return NUll;
     }
 
-    public function responseException(\Exception $e){
-        //echo $e->getMessage();exit;
+    public function respondWithError(\Exception $e, \Psr\Http\Message\ResponseInterface $response)
+    {
         $data = [
             "status"    => "error",
             "type"      => get_class($e),
@@ -282,7 +282,19 @@ Abstract class AbstractRestController
             "message"   => $e->getMessage()
         ];
 
-        return $data;
+        switch ($data['type'])
+        {
+            case 'InvalidArgumentException':
+                $response->withStatus();
+                break;
+
+
+            default:
+                $response->withStatus(500);
+                break;
+        }
+
+        return $response->withJSON($data);
     }
 
     public function convertObjectToHateoas($obj, \Psr\Http\Message\ServerRequestInterface $request)
