@@ -117,8 +117,9 @@ Abstract Class AbstractModel implements IModel
      */
     public function update($args, array $data)
     {
+
         try{
-            if ( ! isset($args) || (! Uuid::isValid($args) && !is_numeric($args)) )
+            if ( ! isset($args) || (! Uuid::isValid($args) && ! is_numeric($args) ) )
             {
                 throw new \InvalidArgumentException("Argument 'Id' value is not set or is invalid (ABSMD-2002exc)", 2002);
             }
@@ -210,7 +211,6 @@ Abstract Class AbstractModel implements IModel
             }
 
             $this->getHydrator()->hydrate($this->getData(), $obj);
-
             return $obj;
         }
         catch(\Exception $e){
