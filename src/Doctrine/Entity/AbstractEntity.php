@@ -17,6 +17,7 @@ use Exchanger\Exception\Exception;
 /**
  * Class AbstractEntity
  * @package Siworks\Slim\Doctrine\Entity
+ *
  */
 Abstract class AbstractEntity
 {
@@ -41,6 +42,6 @@ Abstract class AbstractEntity
             }
             throw new \RuntimeException('The method is not defined. (ABSENT-11001exc)', 11001);
         }
-        throw new \InvalidArgumentException('Attribute does not exist. (ABSENT-11002exc)', 11002);
+        throw new \InvalidArgumentException("Attribute {$field} does not exist. (ABSENT-11002exc)", 11002);
     }
 }
