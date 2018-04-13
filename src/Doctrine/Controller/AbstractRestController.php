@@ -80,12 +80,11 @@ Abstract class AbstractRestController
 
             $entityObject =  $this->modelEntity->create($data);
 
-            return $response->withJSON($entityObject->extractObject());
-
+            $data = $this->getPatternResponseRestFull("POST", $entityObject->extractObject(), $response);
+            return $response->withJSON($data);
         }
         catch (\Exception $e){
-            $response = $this->respondWithError($e, $response);
-            return $response;
+            throw $e;
         }
 
     }
@@ -94,19 +93,24 @@ Abstract class AbstractRestController
     {
         try
         {
+            if ( ! is_array($args) && ( ! isset($args['id']) && is_numeric($args['id'])) )
+            {
+                throw new \InvalidArgumentException("Attribute 'id' is not exist or not numeric (ABSRESCT-4003exc)", 4003);
+            }
+
             $data = $request->getParsedBody();
-            if (count($files = $request->getUploadedFiles()) > 0) {
+
+            if (count($files = $request->getUploadedFiles()) > 0)
+            {
                 $data = array_merge($data, $files);
             }
 
-            $entityObject = $this->modelEntity->update($args, $data);
-            $data = $this->getPatternResponseRestFull("PUT", $entityObject->extractObject());
-
+            $entityObject = $this->modelEntity->update($args['id'], $data);
+            $data = $this->getPatternResponseRestFull("PUT", $entityObject->extractObject(), $response);
             return $response->withJSON($data);
+
         } catch (\Exception $e) {
-            //trato aqui
-            $res = $this->responseException($e);
-            return $response->withJSON($res);
+            throw $e;
         }
     }
 
@@ -114,13 +118,18 @@ Abstract class AbstractRestController
     {
         try
         {
+            if ( ! is_array($args) && ( ! isset($args['id']) && is_numeric($args['id'])) )
+            {
+                throw new \InvalidArgumentException("Attribute 'id' is not exist or not numeric (ABSRESCT-4004exc)", 4004);
+            }
+
             $entityObject =  $this->modelEntity->remove($request->getQueryParams());
-            return $response->withJSON($entityObject->extractObject());
+            $data = $this->getPatternResponseRestFull("DELETE", $entityObject->extractObject(), $response);
+
+            return $response->withJSON($data);
         }
         catch (\Exception $e) {
-            //trato aqui
-            $res = $this->responseException($e);
-            return $response->withJSON($res);
+            throw $e;
         }
     }
 
@@ -151,8 +160,7 @@ Abstract class AbstractRestController
             return $response->withJSON($res);
         }
         catch (\Exception $e) {
-            //trato aqui
-            return $response->withJSON($obj->extractObject());
+            throw $e;
         }
     }
 
@@ -162,7 +170,13 @@ Abstract class AbstractRestController
     public function fetchAction(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\ResponseInterface $response, $args)
     {
         try{
+            if ( ! is_array($args) && ( ! isset($args['id']) && is_numeric($args['id'])) )
+            {
+                throw new \InvalidArgumentException("Attribute 'id' is not exist or not numeric (ABSRESCT-4003exc)", 4003);
+            }
+
             $obj = $this->modelEntity->findOne($args['id']);
+
             if ($obj)
             {
                 $res = $this->convertObjectToHateoas($obj, $request);
@@ -170,12 +184,10 @@ Abstract class AbstractRestController
             }
         }
         catch(\InvalidArgumentException $e){
-            $res = $this->responseException($e);
-            return $response->withJSON($res);
+            throw $e;
         }
         catch(\Exception $e){
-            $res = $this->responseException($e);
-            return $response->withJSON($res);
+            throw $e;
         }
 
     }
@@ -210,7 +222,7 @@ Abstract class AbstractRestController
                 $response->withStatus(201, "Created");
                 $arrResp = [
                     "code"    => 201,
-                    "message" => "created",
+                    "status" => "ok",
                     "data"    => $data,
                 ];
                 break;
@@ -219,7 +231,7 @@ Abstract class AbstractRestController
                 $response->withStatus(200, "Ok");
                 $arrResp = [
                     "code"    => 200,
-                    "message" => "ok",
+                    "status" => "ok",
                     "data"    => $data,
                 ];
                 break;
@@ -227,7 +239,7 @@ Abstract class AbstractRestController
                 $response->withStatus(204, "Ok");
                 $arrResp = [
                     "code"    => 204,
-                    "message" => "ok",
+                    "status" => "ok",
                     "data"    => $data,
                 ];
                 break;
@@ -246,8 +258,8 @@ Abstract class AbstractRestController
         $filters = $this->implodeQueryParams('filters', $data['filters']);
         $order = $this->implodeQueryParams('order', $data['order']);
 
-        $res['current_page'] = ceil($data['offset']/$data['limit']);;
-        $res['total_pages'] = ceil($res['count']/$data['limit']);
+        //$res['current_page'] = ceil($data['offset']%$data['limit'])+1;
+        //$res['total_pages'] = ceil($res['count']/$data['limit']);
         $res['_links'] = [
             'previous' => [
                 "href"      => "{$uri}?{$filters}{$order}offset={$previousOffset}&limit={$data['limit']}",
@@ -271,30 +283,6 @@ Abstract class AbstractRestController
             return $res;
         }
         return NUll;
-    }
-
-    public function respondWithError(\Exception $e, \Psr\Http\Message\ResponseInterface $response)
-    {
-        $data = [
-            "status"    => "error",
-            "type"      => get_class($e),
-            "code"      => $e->getCode(),
-            "message"   => $e->getMessage()
-        ];
-
-        switch ($data['type'])
-        {
-            case 'InvalidArgumentException':
-                $response->withStatus();
-                break;
-
-
-            default:
-                $response->withStatus(500);
-                break;
-        }
-
-        return $response->withJSON($data);
     }
 
     public function convertObjectToHateoas($obj, \Psr\Http\Message\ServerRequestInterface $request)
