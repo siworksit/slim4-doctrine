@@ -249,6 +249,7 @@ Abstract class AbstractRestController
 
     public function mountListResponse(array $res, array $data, \Psr\Http\Message\ServerRequestInterface $request) : array
     {
+        $data["status"] = "ok";
         $previousOffset = $data['offset'] - $data['limit'];
         $previousOffset = ( $previousOffset <= 0 ) ? 0 : $previousOffset;
         $nextOffset = $data['offset'] + $data['limit'];
@@ -276,6 +277,7 @@ Abstract class AbstractRestController
     {
         if(count($value))
         {
+            $res = array();
             foreach($value as $key => $v)
             {
                 $res .= "{$param}[{$key}]={$v}&";
@@ -289,6 +291,7 @@ Abstract class AbstractRestController
     {
         $class_name = get_class($obj);
         $arr = $obj->extractObject();
+
         $arr["_links"] = [
             "update" => [
                 "rel"       => "self",
