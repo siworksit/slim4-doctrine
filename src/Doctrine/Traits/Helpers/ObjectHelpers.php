@@ -35,7 +35,7 @@ trait ObjectHelpers
             }
             else if(is_object($val))
             {
-                if($level < $position){
+                if($level > $position){
                     $arr[$key] = $this->toArray($filterKeys, $val, $level, $position+1);
                 }else{
                     $arr[$key] = $this->getId();
