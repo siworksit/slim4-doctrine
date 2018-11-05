@@ -9,6 +9,7 @@
 namespace Siworks\Slim\Doctrine\Model;
 
 use Doctrine\ORM\ORMInvalidArgumentException;
+use Doctrine\ORM\NoResultException;
 use Siworks\Slim\Doctrine\Traits\Helpers\ObjectHelpers;
 use Doctrine\Common\Collections\ArrayCollection;
 use Ramsey\Uuid\Uuid as Uuid;
@@ -145,7 +146,7 @@ Abstract Class AbstractModel implements IModel
     }
 
     /**
-     * @param Integer $id
+     * @param array $data
      *
      * @return Boolean
      */
@@ -292,5 +293,70 @@ Abstract Class AbstractModel implements IModel
     {
         $this->repository = $repository;
         return $this;
+    }
+
+    /**
+     * method to validate and get one generic relation
+     *
+     * @param $value
+     * @param $name_space
+     * @throws \Exception
+     * @throws \InvalidArgumentException
+     * @throws Doctrine\ORM\NoResultException
+     * @return object
+     */
+    public function getOneRelation($value, $name_space)
+    {
+        try{
+            if ( ! is_numeric($value) )
+            {
+                throw new \InvalidArgumentException("'{$value}' is not numeric (TKTMD0001exc)");
+            }
+
+            $obj = $this->entityManager->getRepository($name_space)
+                ->findOneById($value);
+
+            if( ! $obj instanceof $name_space  )
+            {
+                throw new NoResultException("{$name_space} not found (TKTMD0002exc)");
+            }
+
+            return $obj;
+        }catch(\Exception $e){
+            throw $e;
+        }
+
+    }
+
+    /**
+     * method to validate and get generic many relations
+     *
+     * @param $value
+     * @param $name_space
+     * @throws \Exception
+     * @throws \InvalidArgumentException
+     * @throws Doctrine\ORM\NoResultException
+     * @return object
+     */
+    public function getManyRelations($value, $name_space)
+    {
+        try{
+            if ( ! is_numeric($value) )
+            {
+                throw new \InvalidArgumentException("'{$value}' is not numeric (TKTMD0001exc)");
+            }
+
+            $obj = $this->entityManager->getRepository($name_space)
+                ->findById($value);
+
+            if( ! $obj instanceof $name_space  )
+            {
+                throw new NoResultException("{$name_space} not found (TKTMD0002exc)");
+            }
+
+            return $obj;
+        }catch (\Exception $e){
+            throw $e;
+        }
     }
 }
