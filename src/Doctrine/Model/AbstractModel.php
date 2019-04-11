@@ -11,6 +11,7 @@ namespace Siworks\Slim\Doctrine\Model;
 use Doctrine\ORM\ORMInvalidArgumentException;
 use Doctrine\ORM\NoResultException;
 use Siworks\Slim\Doctrine\Traits\Helpers\ObjectHelpers;
+use Siworks\Slim\Doctrine\Hydrator\Hydrator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Ramsey\Uuid\Uuid as Uuid;
 use GeneratedHydrator\Configuration;
@@ -210,7 +211,7 @@ Abstract Class AbstractModel implements IModel
                 $objData = $obj->toArray();
                 $this->setData(array_filter(array_merge($objData, $this->getData())));
             }
-
+            
             $this->getHydrator()->hydrate($this->getData(), $obj);
             return $obj;
         }
@@ -221,9 +222,7 @@ Abstract Class AbstractModel implements IModel
 
     public function getHydrator()
     {
-        $config = new Configuration($this->getEntityName());
-        $hydratorClass = $config->createFactory()->getHydratorClass();
-        $hydrator = new $hydratorClass();
+        $hydrator = new Hydrator($this->entityManager);
         return $hydrator;
     }
 
@@ -241,6 +240,10 @@ Abstract Class AbstractModel implements IModel
     public function setData(array $data)
     {
         $this->data = $data;
+    }
+    
+    public function getMetaData($classObject){
+        return $this->entityManager->getClassMetadata($classObject);
     }
 
     protected function populateAssociation($obj)
