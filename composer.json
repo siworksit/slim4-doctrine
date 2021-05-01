@@ -1,8 +1,8 @@
 {
-    "name": "siworks/slim3-doctrine",
-    "description": "Simple implementation of Slim3 with Doctrine",
-    "keywords": ["microframework", "slim3", "doctrine", "rest", "router", "psr7"],
-    "homepage": "https://github.com/siworksit/slim3-doctrine.git",
+    "name": "siworks/slim4-doctrine",
+    "description": "Simple implementation of Slim4 with Doctrine",
+    "keywords": ["microframework", "slim4", "doctrine", "rest", "router", "psr7"],
+    "homepage": "https://github.com/siworksit/slim4-doctrine.git",
     "license": "Apache-2.0",
     "authors": [
         {
