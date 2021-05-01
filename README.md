@@ -10,7 +10,7 @@ OR
 
 Clone the repository and access the directory:
 ```sh
-$ git clone git@github.com:siworksit/slim4-doctrine.git && cd slim3-doctrine
+$ git clone git@github.com:siworksit/slim4-doctrine.git && cd slim4-doctrine
 ```
 
 Execute composer command with:
