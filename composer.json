@@ -18,6 +18,7 @@
     ],
     "require": {
         "php": "^7.4",
+        "slim/slim": "^4.7.1",
         "symfony/validator": "5.2.6",
         "monolog/monolog": "^2.0.2",
         "doctrine/orm": "^2.8.4",
