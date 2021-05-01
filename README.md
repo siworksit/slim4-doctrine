@@ -1,4 +1,4 @@
-# Slim3-Doctrine
+# Slim4-Doctrine
 ## Instalation
 
 It's recommended that you use Composer to install slim3-doctrine.
